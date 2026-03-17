@@ -161,19 +161,13 @@ final class AuthService {
     private func ensureUserDocExists(uid: String, email: String) {
         let docRef = db.collection(Constants.Firestore.usersCollection).document(uid)
         Task {
-            do {
-                let snapshot = try await docRef.getDocument()
-                print("[AUTH] ensureUserDoc: exists=\(snapshot.exists)")
-                if !snapshot.exists {
-                    let newUser = AppUser(
-                        displayName: Auth.auth().currentUser?.displayName ?? "User",
-                        email: email
-                    )
-                    try docRef.setData(from: newUser)
-                    print("[AUTH] ensureUserDoc: created new doc")
-                }
-            } catch {
-                print("[AUTH] ensureUserDoc error: \(error)")
+            let snapshot = try? await docRef.getDocument()
+            if snapshot?.exists != true {
+                let newUser = AppUser(
+                    displayName: Auth.auth().currentUser?.displayName ?? "User",
+                    email: email
+                )
+                try? docRef.setData(from: newUser)
             }
         }
     }
@@ -182,24 +176,9 @@ final class AuthService {
         userListener?.remove()
         userListener = db.collection(Constants.Firestore.usersCollection)
             .document(uid)
-            .addSnapshotListener { [weak self] snapshot, error in
-                if let error {
-                    print("[AUTH] listenToUserDoc error: \(error)")
-                    return
-                }
-                guard let snapshot else {
-                    print("[AUTH] listenToUserDoc: no snapshot")
-                    return
-                }
-                print("[AUTH] listenToUserDoc: exists=\(snapshot.exists), data=\(snapshot.data() ?? [:])")
-                if snapshot.exists {
-                    do {
-                        self?.appUser = try snapshot.data(as: AppUser.self)
-                        print("[AUTH] listenToUserDoc: appUser.onboardingCompleted=\(self?.appUser?.onboardingCompleted ?? false)")
-                    } catch {
-                        print("[AUTH] listenToUserDoc decode error: \(error)")
-                    }
-                }
+            .addSnapshotListener { [weak self] snapshot, _ in
+                guard let snapshot, snapshot.exists else { return }
+                self?.appUser = try? snapshot.data(as: AppUser.self)
             }
     }
 

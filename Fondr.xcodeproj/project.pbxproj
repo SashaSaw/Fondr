@@ -29,6 +29,11 @@
 		B708186E0275B620B5195C2C /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5703C449491FF0068C0398 /* User.swift */; };
 		D262D8329E18F2B7515B5138 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C56C2329784A7F1D43A339A /* SignUpView.swift */; };
 		E2DD7DBB24DBB8361EE84DC4 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 699FF98D45EB9CDFDE06887A /* MainTabView.swift */; };
+		AA1111110000000000000001 /* VaultFact.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000001 /* VaultFact.swift */; };
+		AA1111110000000000000002 /* VaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000002 /* VaultService.swift */; };
+		AA1111110000000000000003 /* AddFactSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000003 /* AddFactSheet.swift */; };
+		AA1111110000000000000004 /* VaultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000004 /* VaultView.swift */; };
+		AA1111110000000000000005 /* VaultCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000005 /* VaultCategoryView.swift */; };
 		E7FE64C43B5CD7217913563A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B4D1BC8C039F936C51E0ED4C /* Assets.xcassets */; };
 		EA84B9ABC481989927F30C00 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = C80064575B84268F4FF7648C /* FirebaseMessaging */; };
 /* End PBXBuildFile section */
@@ -57,6 +62,11 @@
 		DF30765D2F295AAA162C80AA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E8AC264D3B38C2CEA4698EA3 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		FAAA20463FEFD1EDF0DF58AF /* FondrApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FondrApp.swift; sourceTree = "<group>"; };
+		AA2222220000000000000001 /* VaultFact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultFact.swift; sourceTree = "<group>"; };
+		AA2222220000000000000002 /* VaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultService.swift; sourceTree = "<group>"; };
+		AA2222220000000000000003 /* AddFactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFactSheet.swift; sourceTree = "<group>"; };
+		AA2222220000000000000004 /* VaultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultView.swift; sourceTree = "<group>"; };
+		AA2222220000000000000005 /* VaultCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultCategoryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +113,7 @@
 			children = (
 				5B6754AFC6DBD0BBAD5FB982 /* AuthService.swift */,
 				9C770B48F16052B883267052 /* PairService.swift */,
+				AA2222220000000000000002 /* VaultService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -129,6 +140,7 @@
 			children = (
 				6DEF4300E3E7AB7AA9145E39 /* Pair.swift */,
 				2F5703C449491FF0068C0398 /* User.swift */,
+				AA2222220000000000000001 /* VaultFact.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -142,12 +154,23 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		AA3333330000000000000001 /* Vault */ = {
+			isa = PBXGroup;
+			children = (
+				AA2222220000000000000003 /* AddFactSheet.swift */,
+				AA2222220000000000000004 /* VaultView.swift */,
+				AA2222220000000000000005 /* VaultCategoryView.swift */,
+			);
+			path = Vault;
+			sourceTree = "<group>";
+		};
 		736DA8C3DB61B9D6A766E5D1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				A9613F75B3DC5B4A5C66B0A4 /* Auth */,
 				15CE5CDB0E1AC60593D25040 /* Main */,
 				1FF18541C1F0BC4262F8FBFC /* Pairing */,
+				AA3333330000000000000001 /* Vault */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -296,6 +319,11 @@
 				095B99DEA99DF72924E98737 /* SignInView.swift in Sources */,
 				D262D8329E18F2B7515B5138 /* SignUpView.swift in Sources */,
 				B708186E0275B620B5195C2C /* User.swift in Sources */,
+				AA1111110000000000000001 /* VaultFact.swift in Sources */,
+				AA1111110000000000000002 /* VaultService.swift in Sources */,
+				AA1111110000000000000003 /* AddFactSheet.swift in Sources */,
+				AA1111110000000000000004 /* VaultView.swift in Sources */,
+				AA1111110000000000000005 /* VaultCategoryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

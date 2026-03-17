@@ -22,6 +22,7 @@ struct FondrApp: App {
                 .environment(appState)
                 .environment(appState.authService)
                 .environment(appState.pairService)
+                .environment(appState.vaultService)
                 .onAppear {
                     appState.authService.start()
                 }

@@ -3,12 +3,8 @@ import SwiftUI
 struct MainTabView: View {
     var body: some View {
         TabView {
-            Tab("Vault", systemImage: "photo.on.rectangle.angled") {
-                EmptyStateView(
-                    emoji: "📸",
-                    title: "Your Vault",
-                    subtitle: "Save photos, videos, and memories together"
-                )
+            Tab("Vault", systemImage: "lock.shield") {
+                VaultView()
             }
 
             Tab("Lists", systemImage: "list.bullet.rectangle") {

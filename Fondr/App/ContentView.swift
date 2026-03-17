@@ -21,5 +21,8 @@ struct ContentView: View {
         .onChange(of: appState.authService.appUser?.pairId) { _, _ in
             appState.setupPairListener()
         }
+        .onChange(of: appState.pairService.currentPair?.id) { _, _ in
+            appState.setupVaultListener()
+        }
     }
 }

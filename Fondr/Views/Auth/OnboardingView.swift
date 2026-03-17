@@ -124,7 +124,6 @@ struct OnboardingView: View {
         isSaving = true
 
         guard let uid = authService.currentUser?.uid else {
-            print("[ONBOARDING] no uid!")
             isSaving = false
             return
         }
@@ -135,7 +134,6 @@ struct OnboardingView: View {
             "timezone": selectedTimezone,
             "onboardingCompleted": true
         ]
-        print("[ONBOARDING] saving for uid \(uid): \(updates)")
 
         Task {
             do {
@@ -143,9 +141,7 @@ struct OnboardingView: View {
                     .collection(Constants.Firestore.usersCollection)
                     .document(uid)
                     .setData(updates, merge: true)
-                print("[ONBOARDING] save SUCCESS")
             } catch {
-                print("[ONBOARDING] save FAILED: \(error)")
                 await MainActor.run { isSaving = false }
             }
         }

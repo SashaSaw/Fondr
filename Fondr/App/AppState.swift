@@ -5,6 +5,7 @@ import Observation
 final class AppState {
     let authService = AuthService()
     let pairService = PairService()
+    let vaultService = VaultService()
 
     var isAuthenticated: Bool {
         authService.currentUser != nil
@@ -31,6 +32,14 @@ final class AppState {
     func setupPairListener() {
         if let pairId = authService.appUser?.pairId {
             pairService.listenToPair(pairId: pairId)
+        }
+    }
+
+    func setupVaultListener() {
+        if let pairId = pairService.currentPair?.id {
+            vaultService.startListening(pairId: pairId)
+        } else {
+            vaultService.stopListening()
         }
     }
 }
