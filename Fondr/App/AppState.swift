@@ -6,6 +6,8 @@ final class AppState {
     let authService = AuthService()
     let pairService = PairService()
     let vaultService = VaultService()
+    let listService = ListService()
+    let sessionService = SessionService()
 
     var isAuthenticated: Bool {
         authService.currentUser != nil
@@ -40,6 +42,23 @@ final class AppState {
             vaultService.startListening(pairId: pairId)
         } else {
             vaultService.stopListening()
+        }
+    }
+
+    func setupListListener() {
+        if let pairId = pairService.currentPair?.id {
+            listService.startListening(pairId: pairId)
+        } else {
+            listService.stopListening()
+        }
+    }
+
+    func setupSessionListener() {
+        if let pairId = pairService.currentPair?.id,
+           let pair = pairService.currentPair {
+            sessionService.startListening(pairId: pairId, pair: pair)
+        } else {
+            sessionService.stopListening()
         }
     }
 }

@@ -34,6 +34,21 @@ enum Constants {
         ]
     }
 
+    enum Lists {
+        static let collection = "lists"
+        static let metaCollection = "lists-meta"
+    }
+
+    enum Sessions {
+        static let collection = "sessions"
+    }
+
+    enum TMDB {
+        static let apiKey = ""
+        static let baseUrl = "https://api.themoviedb.org/3"
+        static let imageBaseUrl = "https://image.tmdb.org/t/p/w500"
+    }
+
     enum Animation {
         static let defaultDuration: Double = 0.3
     }

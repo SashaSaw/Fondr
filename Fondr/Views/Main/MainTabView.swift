@@ -8,19 +8,11 @@ struct MainTabView: View {
             }
 
             Tab("Lists", systemImage: "list.bullet.rectangle") {
-                EmptyStateView(
-                    emoji: "📝",
-                    title: "Shared Lists",
-                    subtitle: "Plan dates, bucket lists, and more"
-                )
+                SharedListsView()
             }
 
             Tab("Swipe", systemImage: "hand.tap") {
-                EmptyStateView(
-                    emoji: "🍿",
-                    title: "Swipe Together",
-                    subtitle: "Find movies, restaurants, and activities you both love"
-                )
+                SwipeTabView()
             }
 
             Tab("Calendar", systemImage: "calendar") {

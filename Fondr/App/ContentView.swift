@@ -23,6 +23,8 @@ struct ContentView: View {
         }
         .onChange(of: appState.pairService.currentPair?.id) { _, _ in
             appState.setupVaultListener()
+            appState.setupListListener()
+            appState.setupSessionListener()
         }
     }
 }
