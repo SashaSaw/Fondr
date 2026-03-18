@@ -23,6 +23,20 @@ struct ListDetailView: View {
         listService.isWatchList(list.id ?? "")
     }
 
+    private var emptySubtitle: String {
+        if showMediaDetails {
+            return "Build your watchlist together — add movies and shows you'd both enjoy"
+        }
+        return "Brainstorm together! Add ideas you'd both love to try"
+    }
+
+    private var emptyCTA: String {
+        if showMediaDetails {
+            return "Add to Watchlist"
+        }
+        return "Add Idea"
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -33,8 +47,8 @@ struct ListDetailView: View {
                 EmptyStateView(
                     emoji: list.emoji,
                     title: "Nothing here yet",
-                    subtitle: "Add the first item to \(list.title)",
-                    ctaTitle: "Add Item",
+                    subtitle: emptySubtitle,
+                    ctaTitle: emptyCTA,
                     ctaAction: { showAddSheet = true }
                 )
                 Spacer()

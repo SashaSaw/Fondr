@@ -51,9 +51,14 @@ final class PairService {
     // MARK: - Join Pair
 
     func joinPair(inviteCode: String) {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let uid = Auth.auth().currentUser?.uid else {
+            print("🔴 [joinPair] No authenticated user")
+            return
+        }
         isLoading = true
         errorMessage = nil
+
+        print("🟡 [joinPair] Starting join with code: \(inviteCode), uid: \(uid)")
 
         Task {
             do {
@@ -64,6 +69,7 @@ final class PairService {
                     .getDocuments()
 
                 guard let doc = snapshot.documents.first else {
+                    print("🔴 [joinPair] No matching pair found for code: \(inviteCode.uppercased())")
                     await MainActor.run {
                         self.errorMessage = "Invalid or expired invite code."
                         self.isLoading = false
@@ -72,31 +78,48 @@ final class PairService {
                 }
 
                 let pairId = doc.documentID
+                let docData = doc.data()
 
                 let existingPair = try doc.data(as: Pair.self)
                 let userAId = existingPair.userA
 
-                // Update pair with userB and set active
-                try await doc.reference.updateData([
-                    "userB": uid,
-                    "status": Pair.Status.active.rawValue
-                ])
+                print("🟡 [joinPair] Found pair: \(pairId)")
+                print("🟡 [joinPair]   userA: \(userAId)")
+                print("🟡 [joinPair]   userB: \(String(describing: docData["userB"]))")
+                print("🟡 [joinPair]   status: \(String(describing: docData["status"]))")
+                print("🟡 [joinPair]   current uid: \(uid)")
 
-                // Update both user docs with pairId and partnerUid
-                let batch = db.batch()
-                let userBRef = db.collection(Constants.Firestore.usersCollection).document(uid)
-                batch.updateData(["pairId": pairId, "partnerUid": userAId], forDocument: userBRef)
+                // Step 1: Update pair with userB and set active
+                print("🟡 [joinPair] Step 1: Updating pair doc...")
+                do {
+                    try await doc.reference.updateData([
+                        "userB": uid,
+                        "status": Pair.Status.active.rawValue
+                    ])
+                    print("🟢 [joinPair] Step 1 succeeded: pair doc updated")
+                } catch {
+                    print("🔴 [joinPair] Step 1 FAILED: pair doc update error: \(error)")
+                    throw error
+                }
 
-                let userARef = db.collection(Constants.Firestore.usersCollection).document(userAId)
-                batch.updateData(["partnerUid": uid], forDocument: userARef)
-
-                try await batch.commit()
+                // Step 2: Update only current user's doc
+                print("🟡 [joinPair] Step 2: Updating user doc for \(uid)...")
+                do {
+                    try await db.collection(Constants.Firestore.usersCollection)
+                        .document(uid)
+                        .updateData(["pairId": pairId, "partnerUid": userAId])
+                    print("🟢 [joinPair] Step 2 succeeded: user doc updated")
+                } catch {
+                    print("🔴 [joinPair] Step 2 FAILED: user doc update error: \(error)")
+                    throw error
+                }
 
                 await MainActor.run {
                     self.listenToPair(pairId: pairId)
                     self.isLoading = false
                 }
             } catch {
+                print("🔴 [joinPair] Overall error: \(error)")
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
                     self.isLoading = false
@@ -116,21 +139,33 @@ final class PairService {
                     self?.currentPair = nil
                     return
                 }
-                self?.currentPair = try? snapshot.data(as: Pair.self)
+                let pair = try? snapshot.data(as: Pair.self)
+                self?.currentPair = pair
+
+                // If pair just became active, userA needs to set partnerUid on their own doc
+                if let pair, pair.status == .active, let userB = pair.userB {
+                    let uid = Auth.auth().currentUser?.uid
+                    if uid == pair.userA {
+                        Firestore.firestore().collection(Constants.Firestore.usersCollection)
+                            .document(pair.userA)
+                            .updateData(["partnerUid": userB])
+                    }
+                }
             }
     }
 
     // MARK: - Cancel Pending Pair
 
     func cancelPair() {
-        guard let pair = currentPair, let pairId = pair.id, pair.status == .pending else { return }
+        guard let pair = currentPair, let pairId = pair.id, pair.status == .pending,
+              let uid = Auth.auth().currentUser?.uid else { return }
 
         Task {
             do {
                 let batch = db.batch()
 
-                // Clear pairId from user
-                let userRef = db.collection(Constants.Firestore.usersCollection).document(pair.userA)
+                // Clear pairId from current user's doc
+                let userRef = db.collection(Constants.Firestore.usersCollection).document(uid)
                 batch.updateData(["pairId": FieldValue.delete()], forDocument: userRef)
 
                 // Delete the pending pair doc
@@ -154,23 +189,25 @@ final class PairService {
     // MARK: - Unpair
 
     func unpair() {
-        guard let pair = currentPair, let pairId = pair.id else { return }
+        guard let pair = currentPair, let pairId = pair.id,
+              let currentUid = Auth.auth().currentUser?.uid else { return }
         isLoading = true
 
         Task {
             do {
-                // Clear pairId from both users
                 let batch = db.batch()
 
-                let userARef = db.collection(Constants.Firestore.usersCollection).document(pair.userA)
-                batch.updateData(["pairId": FieldValue.delete(), "partnerUid": FieldValue.delete()], forDocument: userARef)
+                // Clear current user's pair data and reset onboarding
+                let currentUserRef = db.collection(Constants.Firestore.usersCollection).document(currentUid)
+                batch.updateData([
+                    "pairId": FieldValue.delete(),
+                    "partnerUid": FieldValue.delete(),
+                    "partnerName": FieldValue.delete(),
+                    "onboardingCompleted": FieldValue.delete()
+                ], forDocument: currentUserRef)
 
-                if let userB = pair.userB {
-                    let userBRef = db.collection(Constants.Firestore.usersCollection).document(userB)
-                    batch.updateData(["pairId": FieldValue.delete(), "partnerUid": FieldValue.delete()], forDocument: userBRef)
-                }
-
-                // Delete pair doc
+                // Delete pair doc — partner will detect this via their pair listener
+                // and can handle their own cleanup
                 let pairRef = db.collection(Constants.Firestore.pairsCollection).document(pairId)
                 batch.deleteDocument(pairRef)
 

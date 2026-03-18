@@ -12,6 +12,7 @@ struct SwipeSession: Identifiable, Codable, Sendable, Equatable {
     var startedBy: String
     var createdAt: Date
     var completedAt: Date?
+    var chosenItemId: String?
 }
 
 enum SessionStatus: String, Codable, Sendable {

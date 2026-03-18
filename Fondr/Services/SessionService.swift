@@ -152,6 +152,28 @@ final class SessionService {
         }
     }
 
+    func chooseMatch(sessionId: String, chosenItemId: String, allMatchIds: [String]) {
+        guard let sessionsRef else { return }
+
+        Task {
+            do {
+                // Set the chosen item on the session
+                try await sessionsRef.document(sessionId).updateData([
+                    "chosenItemId": chosenItemId
+                ])
+
+                // Revert non-chosen matches back to suggested
+                for matchId in allMatchIds where matchId != chosenItemId {
+                    await updateItemStatus(itemId: matchId, to: .suggested)
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+
     func discardSession(sessionId: String) {
         Task {
             do {

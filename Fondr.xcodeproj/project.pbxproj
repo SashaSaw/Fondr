@@ -50,8 +50,17 @@
 		DD1111110000000000000003 /* SwipeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2222220000000000000003 /* SwipeCardView.swift */; };
 		DD1111110000000000000004 /* SwipeSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2222220000000000000004 /* SwipeSessionView.swift */; };
 		DD1111110000000000000005 /* SwipeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2222220000000000000005 /* SwipeTabView.swift */; };
+		EE1111110000000000000001 /* AvailabilitySlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000001 /* AvailabilitySlot.swift */; };
+		EE1111110000000000000002 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000002 /* CalendarService.swift */; };
+		EE1111110000000000000003 /* SharedCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000003 /* SharedCalendarView.swift */; };
+		EE1111110000000000000004 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000004 /* DayDetailView.swift */; };
+		EE1111110000000000000005 /* AddAvailabilitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000005 /* AddAvailabilitySheet.swift */; };
+		EE1111110000000000000006 /* EventRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000006 /* EventRequestView.swift */; };
+		FF1111110000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000001 /* SettingsView.swift */; };
+		FF1111110000000000000002 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000002 /* HapticManager.swift */; };
+		FF1111110000000000000003 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000003 /* NotificationService.swift */; };
 		E7FE64C43B5CD7217913563A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B4D1BC8C039F936C51E0ED4C /* Assets.xcassets */; };
-		EA84B9ABC481989927F30C00 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = C80064575B84268F4FF7648C /* FirebaseMessaging */; };
+/* FirebaseMessaging removed — using local notifications instead */
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +108,15 @@
 		DD2222220000000000000003 /* SwipeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeCardView.swift; sourceTree = "<group>"; };
 		DD2222220000000000000004 /* SwipeSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeSessionView.swift; sourceTree = "<group>"; };
 		DD2222220000000000000005 /* SwipeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTabView.swift; sourceTree = "<group>"; };
+		EE2222220000000000000001 /* AvailabilitySlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilitySlot.swift; sourceTree = "<group>"; };
+		EE2222220000000000000002 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
+		EE2222220000000000000003 /* SharedCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarView.swift; sourceTree = "<group>"; };
+		EE2222220000000000000004 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
+		EE2222220000000000000005 /* AddAvailabilitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAvailabilitySheet.swift; sourceTree = "<group>"; };
+		EE2222220000000000000006 /* EventRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRequestView.swift; sourceTree = "<group>"; };
+		FF2222220000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		FF2222220000000000000002 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		FF2222220000000000000003 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,7 +126,6 @@
 			files = (
 				58921D7E097338FDEBC78CF4 /* FirebaseAuth in Frameworks */,
 				24D06C378DEF67605E4645D1 /* FirebaseFirestore in Frameworks */,
-				EA84B9ABC481989927F30C00 /* FirebaseMessaging in Frameworks */,
 				A927D2B57E9DA33847CC5D28 /* AuthenticationServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -144,8 +161,10 @@
 			isa = PBXGroup;
 			children = (
 				5B6754AFC6DBD0BBAD5FB982 /* AuthService.swift */,
+				EE2222220000000000000002 /* CalendarService.swift */,
 				BB2222220000000000000002 /* ListService.swift */,
 				9C770B48F16052B883267052 /* PairService.swift */,
+				FF2222220000000000000003 /* NotificationService.swift */,
 				DD2222220000000000000002 /* SessionService.swift */,
 				BB2222220000000000000003 /* TMDBService.swift */,
 				AA2222220000000000000002 /* VaultService.swift */,
@@ -170,9 +189,21 @@
 			path = Pairing;
 			sourceTree = "<group>";
 		};
+		EE3333330000000000000001 /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				EE2222220000000000000005 /* AddAvailabilitySheet.swift */,
+				EE2222220000000000000004 /* DayDetailView.swift */,
+				EE2222220000000000000006 /* EventRequestView.swift */,
+				EE2222220000000000000003 /* SharedCalendarView.swift */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
 		2F721C0C9BC0AC1A65879F4E /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				EE2222220000000000000001 /* AvailabilitySlot.swift */,
 				BB2222220000000000000001 /* ListItem.swift */,
 				6DEF4300E3E7AB7AA9145E39 /* Pair.swift */,
 				CC2222220000000000000001 /* SharedList.swift */,
@@ -188,6 +219,7 @@
 			children = (
 				03C451CA8EC6C0B659E0B017 /* Color+Fondr.swift */,
 				0ABC80A20C82E0B7AC92B39F /* Constants.swift */,
+				FF2222220000000000000002 /* HapticManager.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -226,13 +258,23 @@
 			path = Swipe;
 			sourceTree = "<group>";
 		};
+		FF3333330000000000000001 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				FF2222220000000000000001 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		736DA8C3DB61B9D6A766E5D1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				A9613F75B3DC5B4A5C66B0A4 /* Auth */,
+				EE3333330000000000000001 /* Calendar */,
 				BB3333330000000000000001 /* Lists */,
 				15CE5CDB0E1AC60593D25040 /* Main */,
 				1FF18541C1F0BC4262F8FBFC /* Pairing */,
+				FF3333330000000000000001 /* Settings */,
 				DD3333330000000000000001 /* Swipe */,
 				AA3333330000000000000001 /* Vault */,
 			);
@@ -305,7 +347,6 @@
 			packageProductDependencies = (
 				3E0F817A7893395B233AAD6A /* FirebaseAuth */,
 				5C6C9BEF6772CE4CB31606DF /* FirebaseFirestore */,
-				C80064575B84268F4FF7648C /* FirebaseMessaging */,
 			);
 			productName = Fondr;
 			productReference = 3946E691AC38A28A460A73FB /* Fondr.app */;
@@ -404,6 +445,15 @@
 				DD1111110000000000000003 /* SwipeCardView.swift in Sources */,
 				DD1111110000000000000004 /* SwipeSessionView.swift in Sources */,
 				DD1111110000000000000005 /* SwipeTabView.swift in Sources */,
+				EE1111110000000000000001 /* AvailabilitySlot.swift in Sources */,
+				EE1111110000000000000002 /* CalendarService.swift in Sources */,
+				EE1111110000000000000003 /* SharedCalendarView.swift in Sources */,
+				EE1111110000000000000004 /* DayDetailView.swift in Sources */,
+				EE1111110000000000000005 /* AddAvailabilitySheet.swift in Sources */,
+				EE1111110000000000000006 /* EventRequestView.swift in Sources */,
+				FF1111110000000000000001 /* SettingsView.swift in Sources */,
+				FF1111110000000000000002 /* HapticManager.swift in Sources */,
+				FF1111110000000000000003 /* NotificationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,6 +472,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Fondr;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor" = LaunchBackground;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -567,6 +618,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Fondr;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor" = LaunchBackground;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -625,11 +677,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
-		};
-		C80064575B84268F4FF7648C /* FirebaseMessaging */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

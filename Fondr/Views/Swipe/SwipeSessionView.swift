@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct SwipeSessionView: View {
     let session: SwipeSession
@@ -13,6 +14,8 @@ struct SwipeSessionView: View {
     @State private var matchedItemTitle = ""
     @State private var showDiscardConfirmation = false
     @State private var showResults = false
+    @State private var selectedMatchId: String?
+    @State private var hasChosen = false
 
     private var sortedItems: [ListItem] {
         session.itemIds.compactMap { itemId in
@@ -46,6 +49,12 @@ struct SwipeSessionView: View {
         .onChange(of: session.status) { _, newValue in
             if newValue == .complete {
                 showResults = true
+            }
+        }
+        .onChange(of: session.chosenItemId) { _, newValue in
+            if let newValue {
+                selectedMatchId = newValue
+                hasChosen = true
             }
         }
     }
@@ -82,12 +91,15 @@ struct SwipeSessionView: View {
                     .background(Color.fondrSecondary.opacity(0.15))
                     .clipShape(Circle())
             }
+            .accessibilityLabel("Close session")
+            .accessibilityHint("Double-tap to leave or discard this swipe session")
 
             Spacer()
 
             Text("\(myProgress + 1 > session.itemIds.count ? session.itemIds.count : myProgress + 1) of \(session.itemIds.count)")
                 .font(.system(.subheadline, design: .rounded, weight: .medium))
                 .foregroundStyle(.secondary)
+                .accessibilityLabel("Item \(min(myProgress + 1, session.itemIds.count)) of \(session.itemIds.count)")
 
             Spacer()
 
@@ -140,6 +152,8 @@ struct SwipeSessionView: View {
                             isWatchList: isWatchList,
                             onSwipe: { direction in handleSwipe(direction: direction) }
                         )
+                        .accessibilityLabel("\(item.title)")
+                        .accessibilityHint("Swipe right to say yes, swipe left to skip")
                     } else {
                         cardContent(for: item)
                             .frame(maxWidth: .infinity)
@@ -203,6 +217,7 @@ struct SwipeSessionView: View {
                     Capsule().strokeBorder(Color.secondary.opacity(0.3), lineWidth: 1.5)
                 )
             }
+            .accessibilityLabel("Skip this idea")
 
             Button {
                 handleSwipe(direction: "right")
@@ -219,6 +234,7 @@ struct SwipeSessionView: View {
                 .background(Color.fondrPrimary)
                 .clipShape(Capsule())
             }
+            .accessibilityLabel("Yes, I like this idea")
         }
         .padding(.bottom, 24)
     }
@@ -262,9 +278,12 @@ struct SwipeSessionView: View {
                         .clipShape(Capsule())
                 }
                 .padding(.top, 8)
+                .accessibilityLabel("Dismiss match and keep swiping")
             }
         }
         .transition(.opacity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("It's a match! You both want \(matchedItemTitle)")
     }
 
     // MARK: - Waiting View
@@ -291,6 +310,7 @@ struct SwipeSessionView: View {
             .font(.system(.subheadline, design: .rounded, weight: .medium))
             .foregroundStyle(.fondrPrimary)
             .padding(.top, 8)
+            .accessibilityHint("You'll be notified when your partner finishes")
             Spacer()
         }
         .padding()
@@ -302,42 +322,195 @@ struct SwipeSessionView: View {
         ScrollView {
             VStack(spacing: 20) {
                 if session.matches.isEmpty {
-                    Text("🤷")
-                        .font(.system(size: 64))
-                    Text("No matches this time")
-                        .font(.system(.title2, design: .rounded, weight: .bold))
-                    Text("Add more ideas and try again!")
-                        .font(.system(.body, design: .rounded))
-                        .foregroundStyle(.secondary)
+                    noMatchesView
+                } else if hasChosen || session.chosenItemId != nil {
+                    chosenView
                 } else {
-                    Text("✨")
-                        .font(.system(size: 64))
-                    Text("\(session.matches.count) Match\(session.matches.count == 1 ? "" : "es")!")
-                        .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                    pickMatchView
+                }
+            }
+            .padding()
+            .padding(.top, 20)
+        }
+    }
 
-                    ForEach(session.matches, id: \.self) { matchId in
-                        if let item = items.first(where: { $0.id == matchId }) {
-                            HStack(spacing: 12) {
-                                Text("✨")
-                                Text(item.title)
-                                    .font(.system(.headline, design: .rounded))
-                                Spacer()
-                            }
-                            .padding()
-                            .background(Color.fondrAccent.opacity(0.1))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
+    private var noMatchesView: some View {
+        VStack(spacing: 16) {
+            Text("🤷")
+                .font(.system(size: 64))
+            Text("No matches this time")
+                .font(.system(.title2, design: .rounded, weight: .bold))
+            Text("Try adding more ideas and swiping again!")
+                .font(.system(.body, design: .rounded))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            HStack(spacing: 16) {
+                Button {
+                    restartSession()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.counterclockwise")
+                        Text("Start Over")
                     }
+                    .font(.system(.headline, design: .rounded, weight: .medium))
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 14)
+                    .foregroundStyle(.fondrPrimary)
+                    .overlay(
+                        Capsule().strokeBorder(Color.fondrPrimary, lineWidth: 1.5)
+                    )
                 }
 
                 FondrButton("Done") {
                     onDismiss()
                 }
-                .padding(.top, 12)
             }
-            .padding()
-            .padding(.top, 20)
+            .padding(.top, 12)
         }
+    }
+
+    private var pickMatchView: some View {
+        VStack(spacing: 20) {
+            Text("✨")
+                .font(.system(size: 64))
+            Text("\(session.matches.count) Match\(session.matches.count == 1 ? "" : "es")!")
+                .font(.system(.largeTitle, design: .rounded, weight: .bold))
+
+            Text("Pick the one you want to go with:")
+                .font(.system(.body, design: .rounded))
+                .foregroundStyle(.secondary)
+
+            ForEach(session.matches, id: \.self) { matchId in
+                if let item = items.first(where: { $0.id == matchId }) {
+                    Button {
+                        HapticManager.shared.selection()
+                        selectedMatchId = matchId
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("✨")
+                            Text(item.title)
+                                .font(.system(.headline, design: .rounded))
+                            Spacer()
+                            if selectedMatchId == matchId {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.fondrPrimary)
+                                    .font(.title3)
+                            }
+                        }
+                        .padding()
+                        .background(
+                            selectedMatchId == matchId
+                                ? Color.fondrPrimary.opacity(0.15)
+                                : Color.fondrAccent.opacity(0.1)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(
+                                    selectedMatchId == matchId ? Color.fondrPrimary : Color.clear,
+                                    lineWidth: 2
+                                )
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Select \(item.title)")
+                    .accessibilityAddTraits(selectedMatchId == matchId ? .isSelected : [])
+                }
+            }
+
+            if let selectedId = selectedMatchId {
+                FondrButton("Confirm Pick") {
+                    confirmChoice(itemId: selectedId)
+                }
+                .padding(.top, 8)
+            }
+
+            Button {
+                restartSession()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.counterclockwise")
+                    Text("Not feeling any of these? Start Over")
+                }
+                .font(.system(.subheadline, design: .rounded, weight: .medium))
+                .foregroundStyle(.secondary)
+            }
+            .padding(.top, 4)
+        }
+    }
+
+    private var chosenView: some View {
+        VStack(spacing: 16) {
+            let chosenId = session.chosenItemId ?? selectedMatchId
+            let chosenItem = items.first(where: { $0.id == chosenId })
+
+            Text("🎉")
+                .font(.system(size: 64))
+
+            Text("You picked it!")
+                .font(.system(.title, design: .rounded, weight: .bold))
+
+            if let item = chosenItem {
+                Text(item.title)
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+                    .foregroundStyle(.fondrPrimary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+
+            Text("Head to your Lists tab to see your pick and mark it as done when you're finished!")
+                .font(.system(.body, design: .rounded))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            FondrButton("Got it") {
+                onDismiss()
+            }
+            .padding(.top, 12)
+        }
+    }
+
+    // MARK: - Result Actions
+
+    private func confirmChoice(itemId: String) {
+        guard let sessionId = session.id else { return }
+        sessionService.chooseMatch(
+            sessionId: sessionId,
+            chosenItemId: itemId,
+            allMatchIds: session.matches
+        )
+        HapticManager.shared.success()
+        withAnimation(.spring(response: 0.4)) {
+            hasChosen = true
+        }
+    }
+
+    private func restartSession() {
+        if let sessionId = session.id {
+            // Revert all matches back to suggested before discarding
+            for matchId in session.matches {
+                Task {
+                    await revertItemStatus(itemId: matchId)
+                }
+            }
+            sessionService.discardSession(sessionId: sessionId)
+        }
+        onDismiss()
+    }
+
+    private func revertItemStatus(itemId: String) async {
+        guard let pairId = appState.pairService.currentPair?.id else { return }
+        let db = Firestore.firestore()
+        try? await db.collection(Constants.Firestore.pairsCollection)
+            .document(pairId)
+            .collection(Constants.Lists.collection)
+            .document(itemId)
+            .updateData([
+                "status": ItemStatus.suggested.rawValue,
+                "updatedAt": Date()
+            ])
     }
 
     // MARK: - Actions
@@ -351,6 +524,9 @@ struct SwipeSessionView: View {
 
         sessionService.submitSwipe(sessionId: sessionId, itemId: itemId, direction: direction)
 
+        // Haptic for swipe completion
+        HapticManager.shared.medium()
+
         // Check if this might cause a match
         let partnerSwipes = sessionService.partnerSwipeCount(in: session) > 0
         if direction == "right" && partnerSwipes {
@@ -360,9 +536,8 @@ struct SwipeSessionView: View {
             let otherSwipes = isUserA ? session.swipesB : session.swipesA
             if otherSwipes[itemId] == "right" {
                 matchedItemTitle = currentItem.title
-                let impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-                impactFeedback.impactOccurred()
-                withAnimation(.spring(response: 0.4)) {
+                HapticManager.shared.heavy()
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
                     showMatchOverlay = true
                 }
             }

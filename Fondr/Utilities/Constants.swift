@@ -1,5 +1,9 @@
 import Foundation
 
+extension Notification.Name {
+    static let switchToTab = Notification.Name("switchToTab")
+}
+
 enum Constants {
     enum App {
         static let name = "Fondr"
@@ -47,6 +51,13 @@ enum Constants {
         static let apiKey = ""
         static let baseUrl = "https://api.themoviedb.org/3"
         static let imageBaseUrl = "https://image.tmdb.org/t/p/w500"
+    }
+
+    enum Calendar {
+        static let collection = "availability"
+        static let eventsCollection = "events"
+        static let defaultStartHour = 8
+        static let defaultEndHour = 23
     }
 
     enum Animation {

@@ -9,6 +9,11 @@ struct SwipeTabView: View {
     @State private var isStarting = false
     @State private var showExistingSessionPrompt = false
     @State private var pendingListId: String?
+    @State private var selectedTab = 0  // 0 = Lists tab in MainTabView
+
+    private var totalSuggested: Int {
+        listService.items.filter { $0.status == .suggested }.count
+    }
 
     var body: some View {
         NavigationStack {
@@ -35,37 +40,28 @@ struct SwipeTabView: View {
     private var launcher: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Header
-                VStack(spacing: 8) {
-                    Text("Can't decide?")
-                        .font(.system(.title, design: .rounded, weight: .bold))
-                    Text("Let's swipe it out")
-                        .font(.system(.title3, design: .rounded))
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.top, 20)
-
-                // Active session banner
-                if let session = sessionService.activeSession {
-                    activeSessionBanner(session)
-                }
-
-                // List cards
-                ForEach(listService.lists) { list in
-                    listLaunchCard(list: list)
-                }
-
-                // Error
-                if let error = sessionError {
-                    Text(error)
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(.red)
-                        .padding(.horizontal)
-                }
-
-                // History
-                if !sessionService.sessionHistory.isEmpty {
-                    historySection
+                if listService.lists.isEmpty {
+                    // No lists at all
+                    Spacer(minLength: 60)
+                    EmptyStateView(
+                        emoji: "🃏",
+                        title: "Nothing to swipe on yet!",
+                        subtitle: "Add some ideas to your lists first, then come back to decide together.",
+                        ctaTitle: "Go to Lists",
+                        ctaAction: { navigateToLists() }
+                    )
+                } else if totalSuggested < 3 {
+                    // Lists exist but too few items
+                    Spacer(minLength: 60)
+                    EmptyStateView(
+                        emoji: "🃏",
+                        title: "Need more ideas!",
+                        subtitle: "You need at least 3 ideas to start swiping. Add some more to your lists!",
+                        ctaTitle: "Go to Lists",
+                        ctaAction: { navigateToLists() }
+                    )
+                } else {
+                    normalLauncher
                 }
 
                 Spacer(minLength: 40)
@@ -87,6 +83,43 @@ struct SwipeTabView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("You have an unfinished session. Continue it or start a new one?")
+        }
+    }
+
+    private var normalLauncher: some View {
+        VStack(spacing: 24) {
+            // Header
+            VStack(spacing: 8) {
+                Text("Can't decide?")
+                    .font(.system(.title, design: .rounded, weight: .bold))
+                Text("Let's swipe it out")
+                    .font(.system(.title3, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.top, 20)
+
+            // Active session banner
+            if let session = sessionService.activeSession {
+                activeSessionBanner(session)
+            }
+
+            // List cards
+            ForEach(listService.lists) { list in
+                listLaunchCard(list: list)
+            }
+
+            // Error
+            if let error = sessionError {
+                Text(error)
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundStyle(.red)
+                    .padding(.horizontal)
+            }
+
+            // History
+            if !sessionService.sessionHistory.isEmpty {
+                historySection
+            }
         }
     }
 
@@ -122,6 +155,7 @@ struct SwipeTabView: View {
         }
         .buttonStyle(ListCardButtonStyle())
         .padding(.horizontal)
+        .accessibilityLabel("Continue active swipe session")
     }
 
     // MARK: - List Launch Card
@@ -133,6 +167,7 @@ struct SwipeTabView: View {
 
         return Button {
             guard isEnabled else { return }
+            HapticManager.shared.light()
             if sessionService.activeSession != nil {
                 pendingListId = list.id
                 showExistingSessionPrompt = true
@@ -145,6 +180,8 @@ struct SwipeTabView: View {
         .buttonStyle(ListCardButtonStyle())
         .disabled(!isEnabled)
         .padding(.horizontal)
+        .accessibilityLabel("\(list.title), \(suggestedCount) ideas")
+        .accessibilityHint(isEnabled ? "Double-tap to start a swipe session" : "Need at least 3 items to start swiping")
     }
 
     private func launchCardLabel(list: SharedList, suggestedCount: Int, isEnabled: Bool) -> some View {
@@ -229,9 +266,15 @@ struct SwipeTabView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Actions
+
+    private func navigateToLists() {
+        // Post notification to switch to Lists tab
+        NotificationCenter.default.post(name: .switchToTab, object: 1)
+    }
 
     private func startSession(listId: String) {
         isStarting = true
@@ -250,6 +293,7 @@ struct SwipeTabView: View {
                 await MainActor.run {
                     isStarting = false
                     sessionError = error.localizedDescription
+                    HapticManager.shared.error()
                 }
             }
         }

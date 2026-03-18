@@ -23,7 +23,7 @@ struct SwipeCardView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 400)
             .clipShape(RoundedRectangle(cornerRadius: 20))
-            .shadow(color: .black.opacity(0.12), radius: 12, x: 0, y: 6)
+            .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
             .overlay {
                 if offset.width > 0 {
                     rightOverlay
@@ -166,6 +166,7 @@ struct SwipeCardView: View {
             .onEnded { value in
                 isDragging = false
                 if value.translation.width > swipeThreshold {
+                    HapticManager.shared.medium()
                     withAnimation(.easeOut(duration: 0.3)) {
                         offset.width = 500
                     }
@@ -174,6 +175,7 @@ struct SwipeCardView: View {
                         offset = .zero
                     }
                 } else if value.translation.width < -swipeThreshold {
+                    HapticManager.shared.light()
                     withAnimation(.easeOut(duration: 0.3)) {
                         offset.width = -500
                     }
