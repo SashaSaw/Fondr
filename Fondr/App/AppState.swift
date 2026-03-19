@@ -7,7 +7,8 @@ import Observation
 final class AppState {
     let authService = AuthService()
     let pairService = PairService()
-    let vaultService = VaultService()
+    let ourStoryService = OurStoryService()
+    let profileImageService = ProfileImageService()
     let listService = ListService()
     let sessionService = SessionService()
     let calendarService = CalendarService()
@@ -71,11 +72,11 @@ final class AppState {
         }
     }
 
-    func setupVaultListener() {
+    func setupOurStoryListener() {
         if let pairId = pairService.currentPair?.id {
-            vaultService.startListening(pairId: pairId)
+            ourStoryService.startListening(pairId: pairId)
         } else {
-            vaultService.stopListening()
+            ourStoryService.stopListening()
         }
     }
 

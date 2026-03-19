@@ -7,6 +7,7 @@ struct Pair: Codable, Identifiable, Sendable {
     var userB: String?
     var inviteCode: String
     var status: Status
+    var anniversary: Date?
     var createdAt: Date
 
     enum Status: String, Codable, Sendable {
@@ -20,6 +21,7 @@ struct Pair: Codable, Identifiable, Sendable {
         userB: String? = nil,
         inviteCode: String,
         status: Status = .pending,
+        anniversary: Date? = nil,
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -27,6 +29,7 @@ struct Pair: Codable, Identifiable, Sendable {
         self.userB = userB
         self.inviteCode = inviteCode
         self.status = status
+        self.anniversary = anniversary
         self.createdAt = createdAt
     }
 }

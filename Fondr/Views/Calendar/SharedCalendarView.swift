@@ -11,6 +11,7 @@ struct SharedCalendarView: View {
     }()
     @State private var showAddEvent = false
     @State private var selectedDayForDetail: Date?
+    @State private var dismissedEmptyState = false
 
     // Drag-to-select state
     @State private var gridWidth: CGFloat = 0
@@ -202,7 +203,7 @@ struct SharedCalendarView: View {
                     dayCell(for: date, index: index)
                 } else {
                     Color.clear
-                        .frame(height: 48)
+                        .frame(height: 56)
                 }
             }
         }
@@ -302,7 +303,7 @@ struct SharedCalendarView: View {
                 heartIndicator(hasMine: hasMine, hasPartner: hasPartner)
             }
         }
-        .frame(height: 48)
+        .frame(height: 56)
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 8)
@@ -316,8 +317,8 @@ struct SharedCalendarView: View {
                 .strokeBorder(
                     isBeingSelected
                         ? (isDragAdding ? Color.fondrSecondary : Color.red.opacity(0.5))
-                        : Color.clear,
-                    lineWidth: 2
+                        : Color(.separator).opacity(0.3),
+                    lineWidth: isBeingSelected ? 2 : 0.5
                 )
         )
         .contentShape(Rectangle())
@@ -326,25 +327,26 @@ struct SharedCalendarView: View {
     // MARK: - Heart Indicator
 
     private func heartIndicator(hasMine: Bool, hasPartner: Bool) -> some View {
-        HStack(spacing: hasMine && hasPartner ? 1 : 0) {
+        let bothBusy = hasMine && hasPartner
+        return ZStack {
             if hasMine {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 12))
+                    .font(.system(size: 18))
                     .foregroundStyle(Color.fondrSecondary)
-                    .mask(alignment: .leading) {
-                        Rectangle().frame(width: 7)
-                    }
+                    .mask { HeartCrackMask(side: .left) }
+                    .rotationEffect(.degrees(bothBusy ? -8 : -5))
+                    .offset(x: bothBusy ? -1.5 : 0)
             }
             if hasPartner {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 12))
+                    .font(.system(size: 18))
                     .foregroundStyle(Color.fondrPartner)
-                    .mask(alignment: .trailing) {
-                        Rectangle().frame(width: 7)
-                    }
+                    .mask { HeartCrackMask(side: .right) }
+                    .rotationEffect(.degrees(bothBusy ? 8 : 5))
+                    .offset(x: bothBusy ? 1.5 : 0)
             }
         }
-        .frame(height: 14)
+        .frame(height: 20)
     }
 
     private func cellBackground(hasEvent: Bool, isBeingSelected: Bool) -> Color {
@@ -380,11 +382,10 @@ struct SharedCalendarView: View {
     private func legendHeartItem(color: Color, label: String, isLeft: Bool) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "heart.fill")
-                .font(.system(size: 10))
+                .font(.system(size: 14))
                 .foregroundStyle(color)
-                .mask(alignment: isLeft ? .leading : .trailing) {
-                    Rectangle().frame(width: 6)
-                }
+                .mask { HeartCrackMask(side: isLeft ? .left : .right) }
+                .rotationEffect(.degrees(isLeft ? -5 : 5))
             Text(label)
         }
     }
@@ -548,7 +549,7 @@ struct SharedCalendarView: View {
     private func gridIndexAt(_ point: CGPoint) -> Int? {
         guard gridWidth > 0 else { return nil }
         let cellWidth = gridWidth / 7
-        let cellHeight: CGFloat = 52 // 48 cell + 4 spacing
+        let cellHeight: CGFloat = 60 // 56 cell + 4 spacing
 
         let col = min(max(Int(point.x / cellWidth), 0), 6)
         let row = min(max(Int(point.y / cellHeight), 0), 5)
@@ -609,6 +610,58 @@ struct SharedCalendarView: View {
 
         let days = (Foundation.Calendar.current.dateComponents([.day], from: start, to: end).day ?? 0) + 1
         return "\(outFmt.string(from: start)) – \(outFmt.string(from: end)) (\(days) days)"
+    }
+}
+
+// MARK: - Heart Crack Mask
+
+private struct HeartCrackMask: View {
+    enum Side { case left, right }
+    let side: Side
+
+    var body: some View {
+        GeometryReader { geo in
+            HeartCrackMaskShape(side: side)
+                .fill()
+                .frame(width: geo.size.width, height: geo.size.height)
+        }
+    }
+}
+
+private struct HeartCrackMaskShape: Shape {
+    let side: HeartCrackMask.Side
+
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width
+        let h = rect.height
+        let midX = rect.midX
+        // Depth of zigzag — subtle but visible
+        let d: CGFloat = w * 0.06
+
+        // Zigzag edge: 2 zags matching the broken heart emoji style
+        // top-center → right → left → right → bottom-center
+        var path = Path()
+        switch side {
+        case .left:
+            path.move(to: CGPoint(x: 0, y: 0))
+            path.addLine(to: CGPoint(x: midX, y: 0))
+            path.addLine(to: CGPoint(x: midX + d, y: h * 0.3))
+            path.addLine(to: CGPoint(x: midX - d, y: h * 0.5))
+            path.addLine(to: CGPoint(x: midX + d, y: h * 0.7))
+            path.addLine(to: CGPoint(x: midX, y: h))
+            path.addLine(to: CGPoint(x: 0, y: h))
+            path.closeSubpath()
+        case .right:
+            path.move(to: CGPoint(x: w, y: 0))
+            path.addLine(to: CGPoint(x: midX, y: 0))
+            path.addLine(to: CGPoint(x: midX + d, y: h * 0.3))
+            path.addLine(to: CGPoint(x: midX - d, y: h * 0.5))
+            path.addLine(to: CGPoint(x: midX + d, y: h * 0.7))
+            path.addLine(to: CGPoint(x: midX, y: h))
+            path.addLine(to: CGPoint(x: w, y: h))
+            path.closeSubpath()
+        }
+        return path
     }
 }
 

@@ -5,8 +5,8 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Vault", systemImage: "lock.shield", value: 0) {
-                VaultView()
+            Tab("Our Story", systemImage: "heart.fill", value: 0) {
+                OurStoryView()
             }
 
             Tab("Lists", systemImage: "list.bullet.rectangle", value: 1) {

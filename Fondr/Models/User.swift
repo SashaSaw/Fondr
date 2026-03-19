@@ -10,6 +10,7 @@ struct AppUser: Codable, Identifiable, Sendable {
     var pairId: String?
     var partnerUid: String?
     var onboardingCompleted: Bool?
+    var profileImageUrl: String?
     var createdAt: Date?
 
     init(
@@ -21,6 +22,7 @@ struct AppUser: Codable, Identifiable, Sendable {
         pairId: String? = nil,
         partnerUid: String? = nil,
         onboardingCompleted: Bool = false,
+        profileImageUrl: String? = nil,
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -31,6 +33,7 @@ struct AppUser: Codable, Identifiable, Sendable {
         self.pairId = pairId
         self.partnerUid = partnerUid
         self.onboardingCompleted = onboardingCompleted
+        self.profileImageUrl = profileImageUrl
         self.createdAt = createdAt
     }
 }

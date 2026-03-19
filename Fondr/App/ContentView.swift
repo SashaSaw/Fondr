@@ -39,7 +39,7 @@ struct ContentView: View {
             }
         }
         .onChange(of: appState.pairService.currentPair?.id) { oldValue, newValue in
-            appState.setupVaultListener()
+            appState.setupOurStoryListener()
             appState.setupListListener()
             appState.setupSessionListener()
             appState.setupCalendarListener()

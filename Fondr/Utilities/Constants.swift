@@ -60,6 +60,12 @@ enum Constants {
         static let defaultEndHour = 23
     }
 
+    enum OurStory {
+        static let significantDatesCollection = "significantDates"
+        static let maxImageDimension: CGFloat = 500
+        static let jpegCompression: CGFloat = 0.7
+    }
+
     enum Animation {
         static let defaultDuration: Double = 0.3
     }

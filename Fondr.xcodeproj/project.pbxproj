@@ -59,6 +59,14 @@
 		FF1111110000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000001 /* SettingsView.swift */; };
 		FF1111110000000000000002 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000002 /* HapticManager.swift */; };
 		FF1111110000000000000003 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000003 /* NotificationService.swift */; };
+		OO1111110000000000000001 /* SignificantDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000001 /* SignificantDate.swift */; };
+		OO1111110000000000000002 /* OurStoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000002 /* OurStoryService.swift */; };
+		OO1111110000000000000003 /* ProfileImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000003 /* ProfileImageService.swift */; };
+		OO1111110000000000000004 /* OurStoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000004 /* OurStoryView.swift */; };
+		OO1111110000000000000005 /* CoupleProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000005 /* CoupleProfileHeader.swift */; };
+		OO1111110000000000000006 /* SetAnniversarySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000006 /* SetAnniversarySheet.swift */; };
+		OO1111110000000000000007 /* AddSignificantDateSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000007 /* AddSignificantDateSheet.swift */; };
+		OO1111110000000000000008 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = OO3333330000000000000001 /* FirebaseStorage */; };
 		E7FE64C43B5CD7217913563A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B4D1BC8C039F936C51E0ED4C /* Assets.xcassets */; };
 /* FirebaseMessaging removed — using local notifications instead */
 /* End PBXBuildFile section */
@@ -117,6 +125,13 @@
 		FF2222220000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		FF2222220000000000000002 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		FF2222220000000000000003 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		OO2222220000000000000001 /* SignificantDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignificantDate.swift; sourceTree = "<group>"; };
+		OO2222220000000000000002 /* OurStoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OurStoryService.swift; sourceTree = "<group>"; };
+		OO2222220000000000000003 /* ProfileImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageService.swift; sourceTree = "<group>"; };
+		OO2222220000000000000004 /* OurStoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OurStoryView.swift; sourceTree = "<group>"; };
+		OO2222220000000000000005 /* CoupleProfileHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoupleProfileHeader.swift; sourceTree = "<group>"; };
+		OO2222220000000000000006 /* SetAnniversarySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetAnniversarySheet.swift; sourceTree = "<group>"; };
+		OO2222220000000000000007 /* AddSignificantDateSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSignificantDateSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +141,7 @@
 			files = (
 				58921D7E097338FDEBC78CF4 /* FirebaseAuth in Frameworks */,
 				24D06C378DEF67605E4645D1 /* FirebaseFirestore in Frameworks */,
+				OO1111110000000000000008 /* FirebaseStorage in Frameworks */,
 				A927D2B57E9DA33847CC5D28 /* AuthenticationServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -163,8 +179,10 @@
 				5B6754AFC6DBD0BBAD5FB982 /* AuthService.swift */,
 				EE2222220000000000000002 /* CalendarService.swift */,
 				BB2222220000000000000002 /* ListService.swift */,
-				9C770B48F16052B883267052 /* PairService.swift */,
 				FF2222220000000000000003 /* NotificationService.swift */,
+				OO2222220000000000000002 /* OurStoryService.swift */,
+				9C770B48F16052B883267052 /* PairService.swift */,
+				OO2222220000000000000003 /* ProfileImageService.swift */,
 				DD2222220000000000000002 /* SessionService.swift */,
 				BB2222220000000000000003 /* TMDBService.swift */,
 				AA2222220000000000000002 /* VaultService.swift */,
@@ -207,6 +225,7 @@
 				BB2222220000000000000001 /* ListItem.swift */,
 				6DEF4300E3E7AB7AA9145E39 /* Pair.swift */,
 				CC2222220000000000000001 /* SharedList.swift */,
+				OO2222220000000000000001 /* SignificantDate.swift */,
 				DD2222220000000000000001 /* SwipeSession.swift */,
 				2F5703C449491FF0068C0398 /* User.swift */,
 				AA2222220000000000000001 /* VaultFact.swift */,
@@ -266,6 +285,17 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		OO3333330000000000000002 /* OurStory */ = {
+			isa = PBXGroup;
+			children = (
+				OO2222220000000000000007 /* AddSignificantDateSheet.swift */,
+				OO2222220000000000000005 /* CoupleProfileHeader.swift */,
+				OO2222220000000000000004 /* OurStoryView.swift */,
+				OO2222220000000000000006 /* SetAnniversarySheet.swift */,
+			);
+			path = OurStory;
+			sourceTree = "<group>";
+		};
 		736DA8C3DB61B9D6A766E5D1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -273,6 +303,7 @@
 				EE3333330000000000000001 /* Calendar */,
 				BB3333330000000000000001 /* Lists */,
 				15CE5CDB0E1AC60593D25040 /* Main */,
+				OO3333330000000000000002 /* OurStory */,
 				1FF18541C1F0BC4262F8FBFC /* Pairing */,
 				FF3333330000000000000001 /* Settings */,
 				DD3333330000000000000001 /* Swipe */,
@@ -347,6 +378,7 @@
 			packageProductDependencies = (
 				3E0F817A7893395B233AAD6A /* FirebaseAuth */,
 				5C6C9BEF6772CE4CB31606DF /* FirebaseFirestore */,
+				OO3333330000000000000001 /* FirebaseStorage */,
 			);
 			productName = Fondr;
 			productReference = 3946E691AC38A28A460A73FB /* Fondr.app */;
@@ -454,6 +486,13 @@
 				FF1111110000000000000001 /* SettingsView.swift in Sources */,
 				FF1111110000000000000002 /* HapticManager.swift in Sources */,
 				FF1111110000000000000003 /* NotificationService.swift in Sources */,
+				OO1111110000000000000001 /* SignificantDate.swift in Sources */,
+				OO1111110000000000000002 /* OurStoryService.swift in Sources */,
+				OO1111110000000000000003 /* ProfileImageService.swift in Sources */,
+				OO1111110000000000000004 /* OurStoryView.swift in Sources */,
+				OO1111110000000000000005 /* CoupleProfileHeader.swift in Sources */,
+				OO1111110000000000000006 /* SetAnniversarySheet.swift in Sources */,
+				OO1111110000000000000007 /* AddSignificantDateSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -677,6 +716,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		OO3333330000000000000001 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

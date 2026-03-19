@@ -38,7 +38,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         let tab: Int
         switch type {
-        case "vault":
+        case "ourStory", "vault":
             tab = 0
         case "listItem":
             tab = 1
@@ -67,7 +67,8 @@ struct FondrApp: App {
                 .environment(appState)
                 .environment(appState.authService)
                 .environment(appState.pairService)
-                .environment(appState.vaultService)
+                .environment(appState.ourStoryService)
+                .environment(appState.profileImageService)
                 .environment(appState.listService)
                 .environment(appState.sessionService)
                 .environment(appState.calendarService)
