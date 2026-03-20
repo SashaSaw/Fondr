@@ -3,6 +3,7 @@ import SwiftUI
 struct ListDetailView: View {
     let list: SharedList
     @Environment(ListService.self) private var listService
+    @Environment(\.dismiss) private var dismiss
     @State private var selectedStatus: ItemStatus? = nil
     @State private var showAddSheet = false
     @State private var showEditSheet = false
@@ -61,12 +62,26 @@ struct ListDetailView: View {
                             ListItemRow(item: item, showMediaDetails: showMediaDetails)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) {
-                                if let id = item.id {
-                                    listService.deleteItem(itemId: id)
+                            if item.status != .done {
+                                Button(role: .destructive) {
+                                    if let id = item.id {
+                                        listService.deleteItem(itemId: id)
+                                    }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                            if item.status == .matched {
+                                Button {
+                                    if let id = item.id {
+                                        listService.markAsDone(itemId: id, note: nil)
+                                    }
+                                } label: {
+                                    Label("Done", systemImage: "checkmark")
+                                }
+                                .tint(.fondrAccent)
                             }
                         }
                     }
@@ -96,7 +111,7 @@ struct ListDetailView: View {
             AddItemSheet(listId: list.id ?? "")
         }
         .sheet(isPresented: $showEditSheet) {
-            CreateListSheet(editing: list)
+            CreateListSheet(editing: list, onDelete: { dismiss() })
         }
     }
 

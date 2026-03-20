@@ -3,11 +3,12 @@ import SwiftUI
 struct OurStoryView: View {
     @Environment(AppState.self) private var appState
     @Environment(OurStoryService.self) private var ourStoryService
+    @Environment(CalendarService.self) private var calendarService
 
     @State private var showAnniversarySheet = false
     @State private var showAddDateSheet = false
+    @State private var showSettings = false
     @State private var partnerImageUrl: String?
-
     private var currentUser: AppUser? { appState.authService.appUser }
     private var currentPair: Pair? { appState.pairService.currentPair }
     private var anniversary: Date? { currentPair?.anniversary }
@@ -17,7 +18,7 @@ struct OurStoryView: View {
     }
 
     private var partnerDisplayName: String {
-        currentUser?.partnerName ?? "Partner"
+        appState.partnerName ?? "Partner"
     }
 
     private var daysTogether: Int? {
@@ -52,6 +53,9 @@ struct OurStoryView: View {
                         partnerUid: currentUser?.partnerUid,
                         onImageUploaded: { url in
                             appState.authService.appUser?.profileImageUrl = url
+                        },
+                        onImageRemoved: {
+                            appState.authService.appUser?.profileImageUrl = nil
                         }
                     )
 
@@ -66,8 +70,21 @@ struct OurStoryView: View {
                 .padding()
             }
             .background(Color.fondrBackground)
-            .navigationTitle("Our Story")
+            .navigationTitle("Us")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .foregroundStyle(.fondrPrimary)
+                    }
+                }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
             .sheet(isPresented: $showAnniversarySheet) {
                 SetAnniversarySheet(existingDate: anniversary)
             }
@@ -132,7 +149,7 @@ struct OurStoryView: View {
 
     @ViewBuilder
     private var upcomingDatesSection: some View {
-        let dates = Array(ourStoryService.upcomingDates(anniversary: anniversary).prefix(5))
+        let dates = Array(ourStoryService.upcomingDates(anniversary: anniversary, calendarEvents: calendarService.events).prefix(5))
 
         VStack(alignment: .leading, spacing: 12) {
             HStack {

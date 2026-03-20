@@ -7,9 +7,11 @@ struct CreateListSheet: View {
     @State private var title: String
     @State private var subtitle: String
     @State private var selectedEmoji: String
+    @State private var showDeleteConfirmation = false
 
     private let editingList: SharedList?
     private let isEditing: Bool
+    var onDelete: (() -> Void)?
 
     private let emojiOptions = ["💡", "🍿", "🎯", "🎮", "🍽️", "✈️", "🎵", "📚", "🏋️", "🛍️", "🎨", "🎲", "🏖️", "💝", "🧘", "🎬", "🌮", "☕", "🎤", "🏠", "🐾", "🎁", "🔥", "💭"]
 
@@ -23,9 +25,10 @@ struct CreateListSheet: View {
         _selectedEmoji = State(initialValue: "📋")
     }
 
-    init(editing list: SharedList) {
+    init(editing list: SharedList, onDelete: (() -> Void)? = nil) {
         self.editingList = list
         self.isEditing = true
+        self.onDelete = onDelete
         _title = State(initialValue: list.title)
         _subtitle = State(initialValue: list.subtitle ?? "")
         _selectedEmoji = State(initialValue: list.emoji)
@@ -49,6 +52,32 @@ struct CreateListSheet: View {
                 Section("Subtitle (optional)") {
                     TextField("e.g. Places to try together", text: $subtitle)
                 }
+
+                if isEditing {
+                    Section {
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Label("Delete List", systemImage: "trash")
+                                Spacer()
+                            }
+                        }
+                    }
+                }
+            }
+            .alert("Delete List", isPresented: $showDeleteConfirmation) {
+                Button("Delete", role: .destructive) {
+                    if let listId = editingList?.id {
+                        listService.deleteList(listId: listId)
+                    }
+                    dismiss()
+                    onDelete?()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently delete this list and all its items.")
             }
             .navigationTitle(isEditing ? "Edit List" : "New List")
             .navigationBarTitleDisplayMode(.inline)

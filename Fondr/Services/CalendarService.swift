@@ -72,13 +72,7 @@ final class CalendarService {
                         print("⚠️ [CalendarService] Failed to decode event \(doc.documentID): \(error)")
                     }
                 }
-                let firestoreIds = Set(decoded.compactMap(\.id))
-                // Keep optimistic events that haven't appeared in Firestore yet
-                let pendingOptimistic = self.events.filter { event in
-                    guard let id = event.id else { return false }
-                    return !firestoreIds.contains(id) && UUID(uuidString: id) != nil
-                }
-                self.events = decoded + pendingOptimistic
+                self.events = decoded
             }
 
         Task {

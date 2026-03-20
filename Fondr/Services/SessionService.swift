@@ -77,9 +77,15 @@ final class SessionService {
             throw SessionError.notAuthenticated
         }
 
-        let suggestedItems = items.filter { $0.listId == listId && $0.status == .suggested }
+        let suggestedItems = items.filter { $0.listId == listId && $0.status != .done }
         guard suggestedItems.count >= 3 else {
             throw SessionError.notEnoughItems
+        }
+
+        let matchedItems = suggestedItems.filter { $0.status == .matched }
+        for item in matchedItems {
+            guard let itemId = item.id else { continue }
+            await updateItemStatus(itemId: itemId, to: .suggested)
         }
 
         let itemIds = suggestedItems.compactMap(\.id).shuffled()
@@ -249,7 +255,7 @@ final class SessionService {
         var errorDescription: String? {
             switch self {
             case .notAuthenticated: "Not authenticated"
-            case .notEnoughItems: "Need at least 3 suggested items to start a session"
+            case .notEnoughItems: "Need at least 3 items to start a session"
             }
         }
     }

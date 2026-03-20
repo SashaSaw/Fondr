@@ -20,26 +20,37 @@ final class ProfileImageService {
         defer { Task { @MainActor in isUploading = false } }
 
         // Resize
+        print("[ProfileImage] Resizing image...")
         let maxDim = Constants.OurStory.maxImageDimension
         let resized = resizeImage(image, maxDimension: maxDim)
+        print("[ProfileImage] Resized to \(resized.size)")
 
+        print("[ProfileImage] Compressing to JPEG...")
         guard let data = resized.jpegData(compressionQuality: Constants.OurStory.jpegCompression) else {
+            print("[ProfileImage] ERROR: Failed to compress image to JPEG")
             throw URLError(.cannotDecodeContentData)
         }
+        print("[ProfileImage] Compressed size: \(data.count) bytes")
 
         // Upload to Firebase Storage
         let storageRef = Storage.storage().reference().child("users/\(uid)/profile.jpg")
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
+        print("[ProfileImage] Uploading to Firebase Storage...")
         _ = try await storageRef.putDataAsync(data, metadata: metadata)
+        print("[ProfileImage] Upload complete. Getting download URL...")
+
         let downloadURL = try await storageRef.downloadURL()
         let urlString = downloadURL.absoluteString
+        print("[ProfileImage] Download URL: \(urlString)")
 
         // Update Firestore user doc
+        print("[ProfileImage] Updating Firestore user doc...")
         try await db.collection(Constants.Firestore.usersCollection)
             .document(uid)
             .updateData(["profileImageUrl": urlString])
+        print("[ProfileImage] Firestore updated successfully")
 
         return urlString
     }

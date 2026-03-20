@@ -2,7 +2,12 @@ import SwiftUI
 
 struct SharedListsView: View {
     @Environment(ListService.self) private var listService
+    @Environment(AppState.self) private var appState
     @State private var showCreateSheet = false
+
+    private var partnerName: String {
+        appState.authService.appUser?.partnerName ?? "your partner"
+    }
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -65,7 +70,17 @@ struct SharedListsView: View {
                     .padding()
                 }
             }
-            .navigationTitle("Lists")
+            .background(Color.fondrBackground)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Things to do with \(partnerName)")
+                        .font(.system(.title3, design: .rounded, weight: .semibold))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                        .multilineTextAlignment(.center)
+                }
+            }
             .sheet(isPresented: $showCreateSheet) {
                 CreateListSheet()
             }

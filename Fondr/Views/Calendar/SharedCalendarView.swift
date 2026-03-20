@@ -12,6 +12,7 @@ struct SharedCalendarView: View {
     @State private var showAddEvent = false
     @State private var selectedDayForDetail: Date?
     @State private var dismissedEmptyState = false
+    @State private var showHelp = false
 
     // Drag-to-select state
     @State private var gridWidth: CGFloat = 0
@@ -19,6 +20,8 @@ struct SharedCalendarView: View {
     @State private var dragCurrentIndex: Int?
     @State private var isDragAdding: Bool = true
     @State private var touchDownTime: Date?
+    @State private var longPressTimer: Timer?
+    @State private var longPressFired = false
 
     private var cal: Foundation.Calendar { Foundation.Calendar.current }
     private var year: Int { cal.component(.year, from: displayedMonth) }
@@ -78,11 +81,14 @@ struct SharedCalendarView: View {
         guard let start = dragStartIndex, let current = dragCurrentIndex else { return [] }
         let lo = min(start, current)
         let hi = max(start, current)
-        return Set((lo...hi).filter { $0 >= 0 && $0 < daysInGrid.count && daysInGrid[$0] != nil })
+        return Set((lo...hi).filter {
+            $0 >= 0 && $0 < daysInGrid.count && daysInGrid[$0] != nil
+            && eventsSpanningDate(dateString(from: daysInGrid[$0]!)).isEmpty
+        })
     }
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
-    private let weekdays = ["M", "T", "W", "T", "F", "S", "S"]
+    private let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     private var hasAnyAvailability: Bool {
         !availability.values.allSatisfy({ $0.mine == nil && $0.partner == nil })
@@ -91,14 +97,14 @@ struct SharedCalendarView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if !hasAnyAvailability && upcomingEvents.isEmpty {
+                if !hasAnyAvailability && upcomingEvents.isEmpty && !dismissedEmptyState {
                     Spacer()
                     EmptyStateView(
                         emoji: "📆",
                         title: "When are you free?",
-                        subtitle: "Add your availability so your partner can see overlaps",
-                        ctaTitle: "Add Times",
-                        ctaAction: { showAddEvent = true }
+                        subtitle: "Tap days on the calendar to mark when you're busy",
+                        ctaTitle: "Open Calendar",
+                        ctaAction: { dismissedEmptyState = true }
                     )
                     Spacer()
                 } else {
@@ -121,8 +127,23 @@ struct SharedCalendarView: View {
                     }
                 }
             }
+            .background(Color.fondrBackground)
             .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showHelp = true
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundStyle(.fondrPrimary)
+                    }
+                }
+            }
+            .sheet(isPresented: $showHelp) {
+                CalendarHelpSheet()
+                    .presentationDetents([.medium])
+            }
             .sheet(isPresented: $showAddEvent) {
                 AddAvailabilitySheet()
                     .presentationDetents([.medium, .large])
@@ -226,35 +247,62 @@ struct SharedCalendarView: View {
                         dragStartIndex = index
                         dragCurrentIndex = index
                         touchDownTime = Date()
+                        longPressFired = false
                         HapticManager.shared.light()
                         if let date = daysInGrid[index] {
                             let dateStr = dateString(from: date)
                             isDragAdding = availability[dateStr]?.mine == nil
                         }
+                        // Start long-press timer
+                        longPressTimer?.invalidate()
+                        let capturedIndex = index
+                        longPressTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+                            DispatchQueue.main.async {
+                                guard dragStartIndex == capturedIndex,
+                                      dragCurrentIndex == capturedIndex,
+                                      let date = daysInGrid[capturedIndex] else { return }
+                                longPressFired = true
+                                dragStartIndex = nil
+                                dragCurrentIndex = nil
+                                HapticManager.shared.medium()
+                                selectedDayForDetail = date
+                            }
+                        }
                     }
+
                     if dragCurrentIndex != index {
+                        // Finger moved to a different cell — cancel long press, treat as drag
+                        longPressTimer?.invalidate()
+                        longPressTimer = nil
                         HapticManager.shared.selection()
                     }
                     dragCurrentIndex = index
                 }
                 .onEnded { value in
+                    longPressTimer?.invalidate()
+                    longPressTimer = nil
+
+                    // If the long press already fired, don't also toggle
+                    guard !longPressFired else {
+                        dragStartIndex = nil
+                        dragCurrentIndex = nil
+                        touchDownTime = nil
+                        return
+                    }
+
                     let distance = hypot(
                         value.location.x - value.startLocation.x,
                         value.location.y - value.startLocation.y
                     )
-                    let holdDuration = Date().timeIntervalSince(touchDownTime ?? Date())
 
-                    if distance < 10 && holdDuration > 0.5 {
-                        // Long press — open day detail
-                        if let startIdx = dragStartIndex,
-                           let date = daysInGrid[startIdx] {
-                            selectedDayForDetail = date
-                        }
-                    } else if distance < 10 {
+                    if distance < 10 {
                         // Tap — toggle just the tapped cell
                         if let startIdx = dragStartIndex,
                            let date = daysInGrid[startIdx] {
-                            calendarService.toggleAvailability(for: date)
+                            let dateStr = dateString(from: date)
+                            if eventsSpanningDate(dateStr).isEmpty {
+                                calendarService.toggleAvailability(for: date)
+                            }
                         }
                     } else {
                         // Drag — apply to entire selected range
@@ -277,6 +325,8 @@ struct SharedCalendarView: View {
         let dayEvents = eventsSpanningDate(dateStr)
         let isBeingSelected = dragSelectedIndices.contains(index)
 
+        let hasEvent = !dayEvents.isEmpty
+
         return VStack(spacing: 1) {
             ZStack {
                 if isToday {
@@ -290,17 +340,15 @@ struct SharedCalendarView: View {
             }
             .frame(height: 26)
 
-            if !dayEvents.isEmpty {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.fondrAccent.opacity(0.85))
-                    .frame(height: 6)
-                    .overlay(
-                        Text(dayEvents.count > 1 ? "\(dayEvents.count)" : "")
-                            .font(.system(size: 5, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                    )
-            } else if hasMine || hasPartner {
+            if hasMine || hasPartner {
                 heartIndicator(hasMine: hasMine, hasPartner: hasPartner)
+            } else if hasEvent {
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color.fondrAccent)
+                    .frame(height: 20)
+            } else {
+                Spacer().frame(height: 20)
             }
         }
         .frame(height: 56)
@@ -308,7 +356,7 @@ struct SharedCalendarView: View {
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(cellBackground(
-                    hasEvent: !dayEvents.isEmpty,
+                    hasEvent: hasEvent,
                     isBeingSelected: isBeingSelected
                 ))
         )
@@ -317,8 +365,10 @@ struct SharedCalendarView: View {
                 .strokeBorder(
                     isBeingSelected
                         ? (isDragAdding ? Color.fondrSecondary : Color.red.opacity(0.5))
-                        : Color(.separator).opacity(0.3),
-                    lineWidth: isBeingSelected ? 2 : 0.5
+                        : hasEvent
+                            ? Color.fondrAccent
+                            : Color(.separator).opacity(0.3),
+                    lineWidth: isBeingSelected ? 2 : (hasEvent ? 1.5 : 0.5)
                 )
         )
         .contentShape(Rectangle())
@@ -358,7 +408,7 @@ struct SharedCalendarView: View {
         if hasEvent {
             return Color.fondrAccent.opacity(0.15)
         }
-        return Color.clear
+        return .white
     }
 
     // MARK: - Legend
@@ -368,10 +418,10 @@ struct SharedCalendarView: View {
             legendHeartItem(color: .fondrSecondary, label: "You're busy", isLeft: true)
             legendHeartItem(color: .fondrPartner, label: "Partner's busy", isLeft: false)
             HStack(spacing: 4) {
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.fondrAccent.opacity(0.15))
-                    .frame(width: 14, height: 14)
-                Text("Event day")
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.fondrAccent)
+                Text("Event")
             }
         }
         .font(.system(.caption2, design: .rounded))
@@ -563,6 +613,7 @@ struct SharedCalendarView: View {
         for index in dragSelectedIndices {
             guard let date = daysInGrid[index] else { continue }
             let dateStr = dateString(from: date)
+            guard eventsSpanningDate(dateStr).isEmpty else { continue }
             let isCurrentlyMarked = availability[dateStr]?.mine != nil
             if isDragAdding && !isCurrentlyMarked {
                 calendarService.toggleAvailability(for: date)
@@ -667,4 +718,156 @@ private struct HeartCrackMaskShape: Shape {
 
 extension Date: @retroactive Identifiable {
     public var id: TimeInterval { timeIntervalSince1970 }
+}
+
+// MARK: - Calendar Help Sheet
+
+private struct CalendarHelpSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 28) {
+                    CalendarHelpRow(
+                        icon: "hand.tap",
+                        title: "Tap to toggle busy",
+                        description: "Tap any day to mark yourself as busy. Tap again to clear it.",
+                        animation: .tap
+                    )
+
+                    CalendarHelpRow(
+                        icon: "hand.draw",
+                        title: "Drag to select range",
+                        description: "Press and drag across multiple days to mark or clear them all at once.",
+                        animation: .drag
+                    )
+
+                    CalendarHelpRow(
+                        icon: "hand.tap.fill",
+                        title: "Long press for details",
+                        description: "Hold a day for 1 second to see events and details for that date.",
+                        animation: .longPress
+                    )
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+            }
+            .navigationTitle("How to use")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .fontWeight(.medium)
+                }
+            }
+        }
+    }
+}
+
+private enum CalendarHelpAnimation {
+    case tap, drag, longPress
+}
+
+private struct CalendarHelpRow: View {
+    let icon: String
+    let title: String
+    let description: String
+    let animation: CalendarHelpAnimation
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 16) {
+            CalendarAnimatedDemo(animation: animation)
+                .frame(width: 64, height: 64)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Label(title, systemImage: icon)
+                    .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                Text(description)
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+private struct CalendarAnimatedDemo: View {
+    let animation: CalendarHelpAnimation
+    @State private var phase: CGFloat = 0
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(UIColor.systemGray6))
+
+            switch animation {
+            case .tap:
+                tapAnimation
+            case .drag:
+                dragAnimation
+            case .longPress:
+                longPressAnimation
+            }
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                phase = 1
+            }
+        }
+    }
+
+    private var tapAnimation: some View {
+        ZStack {
+            HStack(spacing: 3) {
+                ForEach(Array(0..<3), id: \.self) { i in
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(i == 1 ? Color.fondrSecondary.opacity(phase) : Color(UIColor.systemGray5))
+                        .frame(width: 14, height: 14)
+                }
+            }
+
+            Circle()
+                .fill(Color.fondrPrimary.opacity(0.5))
+                .frame(width: 16, height: 16)
+                .scaleEffect(phase < 0.5 ? 0.8 : 1.2)
+                .opacity(phase < 0.3 ? 0.8 : 0.0)
+        }
+    }
+
+    private var dragAnimation: some View {
+        ZStack {
+            HStack(spacing: 3) {
+                ForEach(Array(0..<3), id: \.self) { i in
+                    let filled = CGFloat(i) / 2.0 <= phase
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(filled ? Color.fondrSecondary.opacity(0.6) : Color(UIColor.systemGray5))
+                        .frame(width: 14, height: 14)
+                }
+            }
+
+            Circle()
+                .fill(Color.fondrPrimary.opacity(0.4))
+                .frame(width: 14, height: 14)
+                .offset(x: -17 + (34 * phase), y: 0)
+        }
+    }
+
+    private var longPressAnimation: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(Color(UIColor.systemGray5))
+                .frame(width: 14, height: 14)
+
+            Circle()
+                .stroke(Color.fondrPrimary.opacity(1 - phase), lineWidth: 2)
+                .frame(width: 10 + (14 * phase), height: 10 + (14 * phase))
+
+            Circle()
+                .fill(Color.fondrPrimary.opacity(0.4))
+                .frame(width: 14, height: 14)
+                .scaleEffect(0.9 + 0.1 * phase)
+        }
+    }
 }

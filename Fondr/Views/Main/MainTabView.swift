@@ -5,7 +5,7 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Our Story", systemImage: "heart.fill", value: 0) {
+            Tab("Us", systemImage: "heart.fill", value: 0) {
                 OurStoryView()
             }
 
@@ -19,10 +19,6 @@ struct MainTabView: View {
 
             Tab("Calendar", systemImage: "calendar", value: 3) {
                 SharedCalendarView()
-            }
-
-            Tab("Settings", systemImage: "gearshape", value: 4) {
-                SettingsView()
             }
         }
         .tint(.fondrPrimary)

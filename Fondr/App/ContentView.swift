@@ -60,6 +60,7 @@ struct ContentView: View {
             // re-trigger calendar & notification listeners that depend on it
             appState.setupCalendarListener()
             appState.setupNotificationListener()
+            appState.fetchPartnerDisplayName()
         }
     }
 

@@ -28,8 +28,23 @@ final class AppState {
         return pair.status == .active
     }
 
+    var partnerDisplayName: String? = nil
+
     var partnerName: String? {
-        authService.appUser?.partnerName
+        partnerDisplayName ?? authService.appUser?.partnerName
+    }
+
+    func fetchPartnerDisplayName() {
+        guard let partnerUid = authService.appUser?.partnerUid else {
+            partnerDisplayName = nil
+            return
+        }
+        let db = Firestore.firestore()
+        db.collection(Constants.Firestore.usersCollection).document(partnerUid)
+            .getDocument { [weak self] snapshot, _ in
+                guard let snapshot, snapshot.exists else { return }
+                self?.partnerDisplayName = snapshot.data()?["displayName"] as? String
+            }
     }
 
     var userTimezone: String? {

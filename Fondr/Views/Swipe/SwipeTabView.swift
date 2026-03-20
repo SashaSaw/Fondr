@@ -7,12 +7,9 @@ struct SwipeTabView: View {
     @State private var showSession = false
     @State private var sessionError: String?
     @State private var isStarting = false
-    @State private var showExistingSessionPrompt = false
-    @State private var pendingListId: String?
-    @State private var selectedTab = 0  // 0 = Lists tab in MainTabView
 
     private var totalSuggested: Int {
-        listService.items.filter { $0.status == .suggested }.count
+        listService.items.filter { $0.status != .done }.count
     }
 
     var body: some View {
@@ -67,23 +64,8 @@ struct SwipeTabView: View {
                 Spacer(minLength: 40)
             }
         }
-        .navigationTitle("Swipe")
-        .alert("Unfinished Session", isPresented: $showExistingSessionPrompt) {
-            Button("Continue") {
-                showSession = true
-            }
-            Button("Start Fresh", role: .destructive) {
-                if let id = sessionService.activeSession?.id {
-                    sessionService.discardSession(sessionId: id)
-                }
-                if let listId = pendingListId {
-                    startSession(listId: listId)
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("You have an unfinished session. Continue it or start a new one?")
-        }
+        .background(Color.fondrBackground)
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var normalLauncher: some View {
@@ -97,11 +79,6 @@ struct SwipeTabView: View {
                     .foregroundStyle(.secondary)
             }
             .padding(.top, 20)
-
-            // Active session banner
-            if let session = sessionService.activeSession {
-                activeSessionBanner(session)
-            }
 
             // List cards
             ForEach(listService.lists) { list in
@@ -123,95 +100,87 @@ struct SwipeTabView: View {
         }
     }
 
-    // MARK: - Active Session Banner
-
-    private func activeSessionBanner(_ session: SwipeSession) -> some View {
-        Button {
-            showSession = true
-        } label: {
-            FondrCard {
-                HStack(spacing: 12) {
-                    if let list = listService.lists.first(where: { $0.id == session.listId }) {
-                        Text(list.emoji)
-                            .font(.system(size: 28))
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Active Session")
-                            .font(.system(.headline, design: .rounded, weight: .bold))
-                            .foregroundStyle(.fondrPrimary)
-                        Text("\(sessionService.mySwipeCount(in: session)) of \(session.itemIds.count) swiped")
-                            .font(.system(.caption, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "play.fill")
-                        .foregroundStyle(.fondrPrimary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-        .buttonStyle(ListCardButtonStyle())
-        .padding(.horizontal)
-        .accessibilityLabel("Continue active swipe session")
-    }
-
     // MARK: - List Launch Card
 
     private func listLaunchCard(list: SharedList) -> some View {
         let listId = list.id ?? ""
-        let suggestedCount = listService.items.filter { $0.listId == listId && $0.status == .suggested }.count
-        let isEnabled = suggestedCount >= 3
+        let suggestedCount = listService.items.filter { $0.listId == listId && $0.status != .done }.count
+        let isActiveSession = sessionService.activeSession?.listId == listId
+        let isEnabled = suggestedCount >= 3 || isActiveSession
 
         return Button {
             guard isEnabled else { return }
             HapticManager.shared.light()
-            if sessionService.activeSession != nil {
-                pendingListId = list.id
-                showExistingSessionPrompt = true
+            if isActiveSession {
+                showSession = true
             } else {
                 startSession(listId: listId)
             }
         } label: {
-            launchCardLabel(list: list, suggestedCount: suggestedCount, isEnabled: isEnabled)
+            launchCardLabel(list: list, suggestedCount: suggestedCount, isEnabled: isEnabled, isActiveSession: isActiveSession)
         }
         .buttonStyle(ListCardButtonStyle())
         .disabled(!isEnabled)
         .padding(.horizontal)
         .accessibilityLabel("\(list.title), \(suggestedCount) ideas")
-        .accessibilityHint(isEnabled ? "Double-tap to start a swipe session" : "Need at least 3 items to start swiping")
+        .accessibilityHint(isActiveSession ? "Double-tap to continue session" : isEnabled ? "Double-tap to start a swipe session" : "Need at least 3 items to start swiping")
     }
 
-    private func launchCardLabel(list: SharedList, suggestedCount: Int, isEnabled: Bool) -> some View {
-        let subtitle: String = isEnabled ? "\(suggestedCount) ideas to swipe through" : "Need at least 3 items"
-        let subtitleColor: Color = isEnabled ? .secondary : .red
+    private func launchCardLabel(list: SharedList, suggestedCount: Int, isEnabled: Bool, isActiveSession: Bool) -> some View {
+        let subtitle: String
+        let subtitleColor: Color
+        if isActiveSession, let session = sessionService.activeSession {
+            subtitle = "\(sessionService.mySwipeCount(in: session)) of \(session.itemIds.count) swiped"
+            subtitleColor = .fondrPrimary
+        } else if isEnabled {
+            subtitle = "\(suggestedCount) ideas to swipe through"
+            subtitleColor = .secondary
+        } else {
+            subtitle = "Need at least 3 items"
+            subtitleColor = .red
+        }
 
-        return FondrCard {
-            HStack(spacing: 14) {
-                Text(list.emoji)
-                    .font(.system(size: 36))
+        return HStack(spacing: 14) {
+            Text(list.emoji)
+                .font(.system(size: 36))
 
-                VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
                     Text(list.title)
                         .font(.system(.headline, design: .rounded, weight: .bold))
                         .foregroundStyle(.primary)
-                    Text(subtitle)
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(subtitleColor)
+                    if isActiveSession {
+                        Text("LIVE")
+                            .font(.system(.caption2, design: .rounded, weight: .bold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.fondrPrimary)
+                            .foregroundStyle(.white)
+                            .clipShape(Capsule())
+                    }
                 }
-
-                Spacer()
-
-                if isEnabled {
-                    Image(systemName: "hand.tap.fill")
-                        .font(.title3)
-                        .foregroundStyle(.fondrPrimary)
-                }
+                Text(subtitle)
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundStyle(subtitleColor)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Spacer()
+
+            if isActiveSession {
+                Image(systemName: "play.fill")
+                    .font(.title3)
+                    .foregroundStyle(.fondrPrimary)
+            } else if isEnabled {
+                Image(systemName: "hand.tap.fill")
+                    .font(.title3)
+                    .foregroundStyle(.fondrPrimary)
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(isActiveSession ? Color.fondrPrimary.opacity(0.08) : Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - History
