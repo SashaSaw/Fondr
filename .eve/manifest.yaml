@@ -39,17 +39,6 @@ services:
         engine: postgres
         engine_version: "16"
 
-  migrate:
-    image: public.ecr.aws/w7c4v0w3/eve-horizon/migrate:latest
-    environment:
-      DATABASE_URL: ${managed.db.url}
-      MIGRATIONS_DIR: /migrations
-    x-eve:
-      role: job
-      files:
-        - source: backend/prisma/migrations
-          target: /migrations
-
 environments:
   sandbox:
     pipeline: deploy
@@ -65,8 +54,3 @@ pipelines:
       - name: deploy
         depends_on: [release]
         action: { type: deploy, env_name: sandbox }
-      - name: migrate
-        depends_on: [deploy]
-        action:
-          type: job
-          service: migrate
