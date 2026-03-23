@@ -9,11 +9,7 @@ final class APIClient: Sendable {
     private let encoder: JSONEncoder
 
     private init() {
-        #if DEBUG
-        self.baseURL = "http://localhost:3000"
-        #else
-        self.baseURL = "https://api.fondr.app"
-        #endif
+        self.baseURL = "https://api.sashasaw-fondr-sandbox.eh1.incept5.dev"
 
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30

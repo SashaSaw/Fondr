@@ -8,6 +8,7 @@ final class WebSocketManager {
     private var session: URLSession?
     private var handlers: [String: [(Data) -> Void]] = [:]
     private(set) var isConnected = false
+    private var pingTimer: Timer?
 
     private init() {}
 
@@ -18,11 +19,7 @@ final class WebSocketManager {
 
         disconnect()
 
-        #if DEBUG
-        let urlString = "ws://localhost:3000/socket.io/?EIO=4&transport=websocket&token=\(token)"
-        #else
-        let urlString = "wss://api.fondr.app/socket.io/?EIO=4&transport=websocket&token=\(token)"
-        #endif
+        let urlString = "wss://api.sashasaw-fondr-sandbox.eh1.incept5.dev/ws?token=\(token)"
 
         guard let url = URL(string: urlString) else { return }
 
@@ -31,14 +28,14 @@ final class WebSocketManager {
         webSocket = session?.webSocketTask(with: url)
         webSocket?.resume()
 
-        // Send Socket.IO handshake
-        send(raw: "40")
-
         isConnected = true
         receiveMessage()
+        startPing()
     }
 
     func disconnect() {
+        pingTimer?.invalidate()
+        pingTimer = nil
         webSocket?.cancel(with: .normalClosure, reason: nil)
         webSocket = nil
         session = nil
@@ -65,10 +62,12 @@ final class WebSocketManager {
         handlers.removeAll()
     }
 
-    // MARK: - Send
+    // MARK: - Heartbeat
 
-    private func send(raw text: String) {
-        webSocket?.send(.string(text)) { _ in }
+    private func startPing() {
+        pingTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
+            self?.webSocket?.send(.string("ping")) { _ in }
+        }
     }
 
     // MARK: - Receive
@@ -79,14 +78,15 @@ final class WebSocketManager {
             case .success(let message):
                 switch message {
                 case .string(let text):
-                    self?.handleSocketIOMessage(text)
+                    self?.handleMessage(text)
                 default:
                     break
                 }
-                // Continue listening
                 self?.receiveMessage()
             case .failure:
-                self?.isConnected = false
+                DispatchQueue.main.async {
+                    self?.isConnected = false
+                }
                 // Auto-reconnect after 3 seconds
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     if TokenStore.shared.accessToken != nil {
@@ -97,27 +97,18 @@ final class WebSocketManager {
         }
     }
 
-    private func handleSocketIOMessage(_ raw: String) {
-        // Socket.IO protocol: "42" prefix means event message
-        // Format: 42["eventName", {data}]
-        guard raw.hasPrefix("42") else {
-            // Handle ping "2" -> respond with pong "3"
-            if raw == "2" {
-                send(raw: "3")
-            }
+    private func handleMessage(_ raw: String) {
+        // Server sends: {"event":"vault:created","data":{...}}
+        guard raw != "pong" else { return }
+
+        guard let jsonData = raw.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
+              let eventName = json["event"] as? String,
+              let data = json["data"] else {
             return
         }
 
-        let jsonString = String(raw.dropFirst(2))
-        guard let jsonData = jsonString.data(using: .utf8),
-              let array = try? JSONSerialization.jsonObject(with: jsonData) as? [Any],
-              array.count >= 2,
-              let eventName = array[0] as? String else {
-            return
-        }
-
-        // Serialize the event payload back to Data for decoding
-        guard let payloadData = try? JSONSerialization.data(withJSONObject: array[1]) else {
+        guard let payloadData = try? JSONSerialization.data(withJSONObject: data) else {
             return
         }
 
