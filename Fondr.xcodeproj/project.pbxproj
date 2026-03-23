@@ -7,131 +7,131 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		042ABB2F7F277E4477BB94FE /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90C5E2722721ACCA63FAA218 /* APIClient.swift */; };
+		04FB782626F29F4C48C79FFB /* AddItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4335974CDC00C48D0C9E4C32 /* AddItemSheet.swift */; };
 		095B99DEA99DF72924E98737 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8AC264D3B38C2CEA4698EA3 /* SignInView.swift */; };
+		09D4C7A234974B0FDA001353 /* AvailabilitySlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDA2FCDA9277D4A33AFA5957 /* AvailabilitySlot.swift */; };
+		0D1847B7BEC87225CBB32647 /* VaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DFFC487DE3D9209B0FC2EF6 /* VaultService.swift */; };
+		230240E3F9ACE4DFFD2DBDC0 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8997C9964343348BCD4B50 /* DayDetailView.swift */; };
 		2473560281074E833E07F20D /* FondrApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAA20463FEFD1EDF0DF58AF /* FondrApp.swift */; };
-		24D06C378DEF67605E4645D1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 5C6C9BEF6772CE4CB31606DF /* FirebaseFirestore */; };
 		27B2D5EC6404B56B104C32EB /* FondrCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E484A7702E72CAD7E5B381 /* FondrCard.swift */; };
+		29830366D0A7A1A37851BBBE /* SessionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5BBA8F395714E84E53D9F3 /* SessionService.swift */; };
+		2E3DF13C4BE052F9EACBE503 /* SharedCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F116FB6AE3F6CEB5DED6A276 /* SharedCalendarView.swift */; };
 		30BD5C650537B80A6CC4529E /* Color+Fondr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C451CA8EC6C0B659E0B017 /* Color+Fondr.swift */; };
+		3F7950C25EA58567AAD47AB1 /* CreateListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2616052887D36C66695623A /* CreateListSheet.swift */; };
 		3F95A0CE6D2E5787C49F3947 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF30765D2F295AAA162C80AA /* ContentView.swift */; };
+		40C04ACCD94ADE17E304D499 /* CoupleProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589AFE4DE875A9B17EB3EBC5 /* CoupleProfileHeader.swift */; };
+		42E668B22516024354AA4E58 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B375D8FCD70FFD6F0313E9A6 /* HapticManager.swift */; };
+		43CD25481442FE584412222D /* EventRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6F6586458FE1EF0E936818D /* EventRequestView.swift */; };
+		45C47A2F5DDBFDAD8D308DD5 /* SwipeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3AD8D80718C3044F1217B76 /* SwipeTabView.swift */; };
+		4925705044E0D80B415EB9CC /* ProfileImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA0A0F5F4512633381B18AA /* ProfileImageService.swift */; };
 		4A1E5D4D1DAEDADCF4295887 /* JoinPairView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06CD342CF7BE98AFEC35A16A /* JoinPairView.swift */; };
+		4D6DCEF5024A123717AA85F8 /* SwipeSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C286C95B1F8452EC0F1C832 /* SwipeSessionView.swift */; };
 		560C5C124C5D8BC2FC33735F /* Pair.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEF4300E3E7AB7AA9145E39 /* Pair.swift */; };
-		58921D7E097338FDEBC78CF4 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3E0F817A7893395B233AAD6A /* FirebaseAuth */; };
-		5894D3EB2F69BD7C00B2D64B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5894D3EA2F69BD7C00B2D64B /* GoogleService-Info.plist */; };
+		5C5888BC88394883822C8F75 /* SetAnniversarySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 254F7992A2D27D5D673B649F /* SetAnniversarySheet.swift */; };
+		5C6C3BEB7B54FF4FE0D30623 /* ListItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A33F7E6B896B05377B106CB1 /* ListItemRow.swift */; };
+		5D8517408A87395180551577 /* OurStoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557D6A4588B45D17194CCC9E /* OurStoryView.swift */; };
+		5DB3DA75CCE6BC6806B9ED61 /* ListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473A21260446AE404B162D98 /* ListItem.swift */; };
 		610D93DD3BF5388EBB9F9717 /* FondrButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5603EA3D09301F1DA1868290 /* FondrButton.swift */; };
+		66DDB8F45B00A83BD3329B34 /* ListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CED799C8B373AA22455CF /* ListService.swift */; };
 		6928E9B3A246A50791A0DAF5 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6754AFC6DBD0BBAD5FB982 /* AuthService.swift */; };
 		6F8B6BCDD40A691A36A37B01 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABC80A20C82E0B7AC92B39F /* Constants.swift */; };
+		6FE5C0D26447A1E2E225AE9A /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1D3B9E349F10FFAF8A0D5E /* CalendarService.swift */; };
+		76625BD7C291B3E3200D0E48 /* OurStoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7FACE683BC8212301C227A /* OurStoryService.swift */; };
+		78910672A04651F0A486AC8A /* ListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69125FE78F3DD71C002D672F /* ListDetailView.swift */; };
+		7B236BAA381F0FCA677B2998 /* SwipeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F118E1CD2680DA9A123E2E1 /* SwipeCardView.swift */; };
+		82338C703E3482FAEC9C9688 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25AC8FBD363C5D55A6C1E2FD /* SettingsView.swift */; };
 		8525A0EC733A062D45736664 /* CreatePairView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C64316AE0BBB66EEFEABF857 /* CreatePairView.swift */; };
 		89A42A2302679C098A887639 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4991280BBCD9BDBBB1CE36 /* OnboardingView.swift */; };
 		8A48554ACD21943FA92BA3CA /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B295C00020EE68A9BD13EC /* AppState.swift */; };
 		8B6A93706BE75A43BF31ECB4 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7E5ED0DA17AC315B033418 /* EmptyStateView.swift */; };
 		8D15AD7193B4EE0B48CEB5AE /* PairService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C770B48F16052B883267052 /* PairService.swift */; };
+		98DF8827D2F0D188394BDF55 /* SharedListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86B75EB1F8FE2058AD458A7 /* SharedListsView.swift */; };
 		A927D2B57E9DA33847CC5D28 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F1DD7DB28049B47E107610C /* AuthenticationServices.framework */; };
+		AAA05FFDDE125930337D2C05 /* VaultFact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47498397E107E77D58C0B647 /* VaultFact.swift */; };
+		B3632E7D63CC47CC6BD68250 /* AddSignificantDateSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456D361BE704051273AA8E01 /* AddSignificantDateSheet.swift */; };
+		B38ED8E5A6900210BB31A44F /* VaultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F45A4E3597D9C05C0531080 /* VaultView.swift */; };
 		B708186E0275B620B5195C2C /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5703C449491FF0068C0398 /* User.swift */; };
+		B7DAC5A04ED4AB1A6CD81CEB /* SharedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A4AEF7E420796C1EDB7FC4 /* SharedList.swift */; };
+		C05A1ABE0598DF494CD162A9 /* VaultCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836E8DFB03605EA6DB853B42 /* VaultCategoryView.swift */; };
+		C0DE7291A6B3A710021599C9 /* ListCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 914A22A788DACEEA8F24BF7A /* ListCardView.swift */; };
+		C3E6EDA00CC12A517A1C9BA4 /* ListItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDC6A1A6DD98ABC4AFE7C12 /* ListItemDetailView.swift */; };
 		D262D8329E18F2B7515B5138 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C56C2329784A7F1D43A339A /* SignUpView.swift */; };
+		D9551FE13FF6A42C0FDFF034 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03C3BEBB6B29C07FDF3C4AE /* NotificationService.swift */; };
+		DF7F4839D69FABA7F7A09D6A /* SwipeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C360B6D9E8718EC28D34E8 /* SwipeSession.swift */; };
+		E240EF455133F02C80395F97 /* AddAvailabilitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0EE995098FE144EDFCFB84 /* AddAvailabilitySheet.swift */; };
 		E2DD7DBB24DBB8361EE84DC4 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 699FF98D45EB9CDFDE06887A /* MainTabView.swift */; };
-		AA1111110000000000000001 /* VaultFact.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000001 /* VaultFact.swift */; };
-		AA1111110000000000000002 /* VaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000002 /* VaultService.swift */; };
-		AA1111110000000000000003 /* AddFactSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000003 /* AddFactSheet.swift */; };
-		AA1111110000000000000004 /* VaultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000004 /* VaultView.swift */; };
-		AA1111110000000000000005 /* VaultCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000005 /* VaultCategoryView.swift */; };
-		BB1111110000000000000001 /* ListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2222220000000000000001 /* ListItem.swift */; };
-		BB1111110000000000000002 /* ListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2222220000000000000002 /* ListService.swift */; };
-		BB1111110000000000000003 /* TMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2222220000000000000003 /* TMDBService.swift */; };
-		BB1111110000000000000004 /* SharedListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2222220000000000000004 /* SharedListsView.swift */; };
-		BB1111110000000000000005 /* AddItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2222220000000000000005 /* AddItemSheet.swift */; };
-		BB1111110000000000000006 /* ListItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2222220000000000000006 /* ListItemDetailView.swift */; };
-		BB1111110000000000000007 /* ListItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2222220000000000000007 /* ListItemRow.swift */; };
-		CC1111110000000000000001 /* SharedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000001 /* SharedList.swift */; };
-		CC1111110000000000000002 /* ListCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000002 /* ListCardView.swift */; };
-		CC1111110000000000000003 /* CreateListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000003 /* CreateListSheet.swift */; };
-		CC1111110000000000000004 /* ListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000004 /* ListDetailView.swift */; };
-		DD1111110000000000000001 /* SwipeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2222220000000000000001 /* SwipeSession.swift */; };
-		DD1111110000000000000002 /* SessionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2222220000000000000002 /* SessionService.swift */; };
-		DD1111110000000000000003 /* SwipeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2222220000000000000003 /* SwipeCardView.swift */; };
-		DD1111110000000000000004 /* SwipeSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2222220000000000000004 /* SwipeSessionView.swift */; };
-		DD1111110000000000000005 /* SwipeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2222220000000000000005 /* SwipeTabView.swift */; };
-		EE1111110000000000000001 /* AvailabilitySlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000001 /* AvailabilitySlot.swift */; };
-		EE1111110000000000000002 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000002 /* CalendarService.swift */; };
-		EE1111110000000000000003 /* SharedCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000003 /* SharedCalendarView.swift */; };
-		EE1111110000000000000004 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000004 /* DayDetailView.swift */; };
-		EE1111110000000000000005 /* AddAvailabilitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000005 /* AddAvailabilitySheet.swift */; };
-		EE1111110000000000000006 /* EventRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2222220000000000000006 /* EventRequestView.swift */; };
-		FF1111110000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000001 /* SettingsView.swift */; };
-		FF1111110000000000000002 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000002 /* HapticManager.swift */; };
-		FF1111110000000000000003 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2222220000000000000003 /* NotificationService.swift */; };
-		OO1111110000000000000001 /* SignificantDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000001 /* SignificantDate.swift */; };
-		OO1111110000000000000002 /* OurStoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000002 /* OurStoryService.swift */; };
-		OO1111110000000000000003 /* ProfileImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000003 /* ProfileImageService.swift */; };
-		OO1111110000000000000004 /* OurStoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000004 /* OurStoryView.swift */; };
-		OO1111110000000000000005 /* CoupleProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000005 /* CoupleProfileHeader.swift */; };
-		OO1111110000000000000006 /* SetAnniversarySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000006 /* SetAnniversarySheet.swift */; };
-		OO1111110000000000000007 /* AddSignificantDateSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = OO2222220000000000000007 /* AddSignificantDateSheet.swift */; };
-		OO1111110000000000000008 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = OO3333330000000000000001 /* FirebaseStorage */; };
+		E45557D5D7F245E3585E13A9 /* TMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434D084C48304F2981DCCDDE /* TMDBService.swift */; };
+		E5905C463CEE32038C80237E /* AddFactSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A69D7F1E8EFE0A4D0379ACEC /* AddFactSheet.swift */; };
 		E7FE64C43B5CD7217913563A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B4D1BC8C039F936C51E0ED4C /* Assets.xcassets */; };
-/* FirebaseMessaging removed — using local notifications instead */
+		ED36B57899E4D5870B6C00E0 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4946678750C7DD20ABBFD8BE /* TokenStore.swift */; };
+		F22F9FB147A0C40F044887FA /* WebSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2A4E69A07D9B7A692F9510 /* WebSocketManager.swift */; };
+		F3D0336F3C5859D9FD92BB62 /* SignificantDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AD6F36F9EA79DAEAD54520 /* SignificantDate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		02A4AEF7E420796C1EDB7FC4 /* SharedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedList.swift; sourceTree = "<group>"; };
 		03C451CA8EC6C0B659E0B017 /* Color+Fondr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Fondr.swift"; sourceTree = "<group>"; };
 		04B295C00020EE68A9BD13EC /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		06CD342CF7BE98AFEC35A16A /* JoinPairView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinPairView.swift; sourceTree = "<group>"; };
 		0ABC80A20C82E0B7AC92B39F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		0B5BBA8F395714E84E53D9F3 /* SessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionService.swift; sourceTree = "<group>"; };
 		0C56C2329784A7F1D43A339A /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
+		1C286C95B1F8452EC0F1C832 /* SwipeSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeSessionView.swift; sourceTree = "<group>"; };
 		1F1DD7DB28049B47E107610C /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
+		1F45A4E3597D9C05C0531080 /* VaultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultView.swift; sourceTree = "<group>"; };
+		254F7992A2D27D5D673B649F /* SetAnniversarySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetAnniversarySheet.swift; sourceTree = "<group>"; };
+		25AC8FBD363C5D55A6C1E2FD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		26C360B6D9E8718EC28D34E8 /* SwipeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeSession.swift; sourceTree = "<group>"; };
+		2D2A4E69A07D9B7A692F9510 /* WebSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketManager.swift; sourceTree = "<group>"; };
 		2F5703C449491FF0068C0398 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		3946E691AC38A28A460A73FB /* Fondr.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fondr.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4335974CDC00C48D0C9E4C32 /* AddItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemSheet.swift; sourceTree = "<group>"; };
+		434D084C48304F2981DCCDDE /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
+		456D361BE704051273AA8E01 /* AddSignificantDateSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSignificantDateSheet.swift; sourceTree = "<group>"; };
+		473A21260446AE404B162D98 /* ListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItem.swift; sourceTree = "<group>"; };
+		47498397E107E77D58C0B647 /* VaultFact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultFact.swift; sourceTree = "<group>"; };
+		4946678750C7DD20ABBFD8BE /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
+		4E0EE995098FE144EDFCFB84 /* AddAvailabilitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAvailabilitySheet.swift; sourceTree = "<group>"; };
+		557D6A4588B45D17194CCC9E /* OurStoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OurStoryView.swift; sourceTree = "<group>"; };
 		5603EA3D09301F1DA1868290 /* FondrButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FondrButton.swift; sourceTree = "<group>"; };
-		5894D3EA2F69BD7C00B2D64B /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		589AFE4DE875A9B17EB3EBC5 /* CoupleProfileHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoupleProfileHeader.swift; sourceTree = "<group>"; };
 		5B6754AFC6DBD0BBAD5FB982 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		619B5B42293959209D4BC1FC /* Fondr.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Fondr.entitlements; sourceTree = "<group>"; };
+		69125FE78F3DD71C002D672F /* ListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailView.swift; sourceTree = "<group>"; };
 		699FF98D45EB9CDFDE06887A /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		6DEF4300E3E7AB7AA9145E39 /* Pair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pair.swift; sourceTree = "<group>"; };
+		6F8997C9964343348BCD4B50 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
+		7DDC6A1A6DD98ABC4AFE7C12 /* ListItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemDetailView.swift; sourceTree = "<group>"; };
+		836E8DFB03605EA6DB853B42 /* VaultCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultCategoryView.swift; sourceTree = "<group>"; };
 		85E484A7702E72CAD7E5B381 /* FondrCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FondrCard.swift; sourceTree = "<group>"; };
+		8DFFC487DE3D9209B0FC2EF6 /* VaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultService.swift; sourceTree = "<group>"; };
+		90C5E2722721ACCA63FAA218 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		914A22A788DACEEA8F24BF7A /* ListCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListCardView.swift; sourceTree = "<group>"; };
 		9C770B48F16052B883267052 /* PairService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairService.swift; sourceTree = "<group>"; };
+		9F118E1CD2680DA9A123E2E1 /* SwipeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeCardView.swift; sourceTree = "<group>"; };
+		A03C3BEBB6B29C07FDF3C4AE /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		A0AD6F36F9EA79DAEAD54520 /* SignificantDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignificantDate.swift; sourceTree = "<group>"; };
+		A2616052887D36C66695623A /* CreateListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateListSheet.swift; sourceTree = "<group>"; };
+		A33F7E6B896B05377B106CB1 /* ListItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemRow.swift; sourceTree = "<group>"; };
+		A69D7F1E8EFE0A4D0379ACEC /* AddFactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFactSheet.swift; sourceTree = "<group>"; };
+		AB7FACE683BC8212301C227A /* OurStoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OurStoryService.swift; sourceTree = "<group>"; };
 		AC7E5ED0DA17AC315B033418 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
+		AEA0A0F5F4512633381B18AA /* ProfileImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageService.swift; sourceTree = "<group>"; };
+		B375D8FCD70FFD6F0313E9A6 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		B3AD8D80718C3044F1217B76 /* SwipeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTabView.swift; sourceTree = "<group>"; };
 		B4D1BC8C039F936C51E0ED4C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B6F6586458FE1EF0E936818D /* EventRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRequestView.swift; sourceTree = "<group>"; };
 		C64316AE0BBB66EEFEABF857 /* CreatePairView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePairView.swift; sourceTree = "<group>"; };
 		CA4991280BBCD9BDBBB1CE36 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		CDA2FCDA9277D4A33AFA5957 /* AvailabilitySlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilitySlot.swift; sourceTree = "<group>"; };
+		CF1D3B9E349F10FFAF8A0D5E /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
 		DF30765D2F295AAA162C80AA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E8AC264D3B38C2CEA4698EA3 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		F116FB6AE3F6CEB5DED6A276 /* SharedCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarView.swift; sourceTree = "<group>"; };
+		F86B75EB1F8FE2058AD458A7 /* SharedListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedListsView.swift; sourceTree = "<group>"; };
+		FA6CED799C8B373AA22455CF /* ListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListService.swift; sourceTree = "<group>"; };
 		FAAA20463FEFD1EDF0DF58AF /* FondrApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FondrApp.swift; sourceTree = "<group>"; };
-		AA2222220000000000000001 /* VaultFact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultFact.swift; sourceTree = "<group>"; };
-		AA2222220000000000000002 /* VaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultService.swift; sourceTree = "<group>"; };
-		AA2222220000000000000003 /* AddFactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFactSheet.swift; sourceTree = "<group>"; };
-		AA2222220000000000000004 /* VaultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultView.swift; sourceTree = "<group>"; };
-		AA2222220000000000000005 /* VaultCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultCategoryView.swift; sourceTree = "<group>"; };
-		BB2222220000000000000001 /* ListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItem.swift; sourceTree = "<group>"; };
-		BB2222220000000000000002 /* ListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListService.swift; sourceTree = "<group>"; };
-		BB2222220000000000000003 /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
-		BB2222220000000000000004 /* SharedListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedListsView.swift; sourceTree = "<group>"; };
-		BB2222220000000000000005 /* AddItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemSheet.swift; sourceTree = "<group>"; };
-		BB2222220000000000000006 /* ListItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemDetailView.swift; sourceTree = "<group>"; };
-		BB2222220000000000000007 /* ListItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemRow.swift; sourceTree = "<group>"; };
-		CC2222220000000000000001 /* SharedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedList.swift; sourceTree = "<group>"; };
-		CC2222220000000000000002 /* ListCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListCardView.swift; sourceTree = "<group>"; };
-		CC2222220000000000000003 /* CreateListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateListSheet.swift; sourceTree = "<group>"; };
-		CC2222220000000000000004 /* ListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailView.swift; sourceTree = "<group>"; };
-		DD2222220000000000000001 /* SwipeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeSession.swift; sourceTree = "<group>"; };
-		DD2222220000000000000002 /* SessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionService.swift; sourceTree = "<group>"; };
-		DD2222220000000000000003 /* SwipeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeCardView.swift; sourceTree = "<group>"; };
-		DD2222220000000000000004 /* SwipeSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeSessionView.swift; sourceTree = "<group>"; };
-		DD2222220000000000000005 /* SwipeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTabView.swift; sourceTree = "<group>"; };
-		EE2222220000000000000001 /* AvailabilitySlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilitySlot.swift; sourceTree = "<group>"; };
-		EE2222220000000000000002 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
-		EE2222220000000000000003 /* SharedCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarView.swift; sourceTree = "<group>"; };
-		EE2222220000000000000004 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
-		EE2222220000000000000005 /* AddAvailabilitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAvailabilitySheet.swift; sourceTree = "<group>"; };
-		EE2222220000000000000006 /* EventRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRequestView.swift; sourceTree = "<group>"; };
-		FF2222220000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		FF2222220000000000000002 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
-		FF2222220000000000000003 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		OO2222220000000000000001 /* SignificantDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignificantDate.swift; sourceTree = "<group>"; };
-		OO2222220000000000000002 /* OurStoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OurStoryService.swift; sourceTree = "<group>"; };
-		OO2222220000000000000003 /* ProfileImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageService.swift; sourceTree = "<group>"; };
-		OO2222220000000000000004 /* OurStoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OurStoryView.swift; sourceTree = "<group>"; };
-		OO2222220000000000000005 /* CoupleProfileHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoupleProfileHeader.swift; sourceTree = "<group>"; };
-		OO2222220000000000000006 /* SetAnniversarySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetAnniversarySheet.swift; sourceTree = "<group>"; };
-		OO2222220000000000000007 /* AddSignificantDateSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSignificantDateSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,9 +139,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				58921D7E097338FDEBC78CF4 /* FirebaseAuth in Frameworks */,
-				24D06C378DEF67605E4645D1 /* FirebaseFirestore in Frameworks */,
-				OO1111110000000000000008 /* FirebaseStorage in Frameworks */,
 				A927D2B57E9DA33847CC5D28 /* AuthenticationServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -160,7 +157,6 @@
 		0A6B6BF866DB072FC06BBE4F /* Fondr */ = {
 			isa = PBXGroup;
 			children = (
-				5894D3EA2F69BD7C00B2D64B /* GoogleService-Info.plist */,
 				B4D1BC8C039F936C51E0ED4C /* Assets.xcassets */,
 				619B5B42293959209D4BC1FC /* Fondr.entitlements */,
 				833A66C8DE830DA9AAEC7973 /* App */,
@@ -176,16 +172,19 @@
 		0D5FB3F2318E0F88215B150C /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				90C5E2722721ACCA63FAA218 /* APIClient.swift */,
 				5B6754AFC6DBD0BBAD5FB982 /* AuthService.swift */,
-				EE2222220000000000000002 /* CalendarService.swift */,
-				BB2222220000000000000002 /* ListService.swift */,
-				FF2222220000000000000003 /* NotificationService.swift */,
-				OO2222220000000000000002 /* OurStoryService.swift */,
+				CF1D3B9E349F10FFAF8A0D5E /* CalendarService.swift */,
+				FA6CED799C8B373AA22455CF /* ListService.swift */,
+				A03C3BEBB6B29C07FDF3C4AE /* NotificationService.swift */,
+				AB7FACE683BC8212301C227A /* OurStoryService.swift */,
 				9C770B48F16052B883267052 /* PairService.swift */,
-				OO2222220000000000000003 /* ProfileImageService.swift */,
-				DD2222220000000000000002 /* SessionService.swift */,
-				BB2222220000000000000003 /* TMDBService.swift */,
-				AA2222220000000000000002 /* VaultService.swift */,
+				AEA0A0F5F4512633381B18AA /* ProfileImageService.swift */,
+				0B5BBA8F395714E84E53D9F3 /* SessionService.swift */,
+				434D084C48304F2981DCCDDE /* TMDBService.swift */,
+				4946678750C7DD20ABBFD8BE /* TokenStore.swift */,
+				8DFFC487DE3D9209B0FC2EF6 /* VaultService.swift */,
+				2D2A4E69A07D9B7A692F9510 /* WebSocketManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -207,28 +206,17 @@
 			path = Pairing;
 			sourceTree = "<group>";
 		};
-		EE3333330000000000000001 /* Calendar */ = {
-			isa = PBXGroup;
-			children = (
-				EE2222220000000000000005 /* AddAvailabilitySheet.swift */,
-				EE2222220000000000000004 /* DayDetailView.swift */,
-				EE2222220000000000000006 /* EventRequestView.swift */,
-				EE2222220000000000000003 /* SharedCalendarView.swift */,
-			);
-			path = Calendar;
-			sourceTree = "<group>";
-		};
 		2F721C0C9BC0AC1A65879F4E /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				EE2222220000000000000001 /* AvailabilitySlot.swift */,
-				BB2222220000000000000001 /* ListItem.swift */,
+				CDA2FCDA9277D4A33AFA5957 /* AvailabilitySlot.swift */,
+				473A21260446AE404B162D98 /* ListItem.swift */,
 				6DEF4300E3E7AB7AA9145E39 /* Pair.swift */,
-				CC2222220000000000000001 /* SharedList.swift */,
-				OO2222220000000000000001 /* SignificantDate.swift */,
-				DD2222220000000000000001 /* SwipeSession.swift */,
+				02A4AEF7E420796C1EDB7FC4 /* SharedList.swift */,
+				A0AD6F36F9EA79DAEAD54520 /* SignificantDate.swift */,
+				26C360B6D9E8718EC28D34E8 /* SwipeSession.swift */,
 				2F5703C449491FF0068C0398 /* User.swift */,
-				AA2222220000000000000001 /* VaultFact.swift */,
+				47498397E107E77D58C0B647 /* VaultFact.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -238,78 +226,49 @@
 			children = (
 				03C451CA8EC6C0B659E0B017 /* Color+Fondr.swift */,
 				0ABC80A20C82E0B7AC92B39F /* Constants.swift */,
-				FF2222220000000000000002 /* HapticManager.swift */,
+				B375D8FCD70FFD6F0313E9A6 /* HapticManager.swift */,
 			);
 			path = Utilities;
-			sourceTree = "<group>";
-		};
-		AA3333330000000000000001 /* Vault */ = {
-			isa = PBXGroup;
-			children = (
-				AA2222220000000000000003 /* AddFactSheet.swift */,
-				AA2222220000000000000004 /* VaultView.swift */,
-				AA2222220000000000000005 /* VaultCategoryView.swift */,
-			);
-			path = Vault;
-			sourceTree = "<group>";
-		};
-		BB3333330000000000000001 /* Lists */ = {
-			isa = PBXGroup;
-			children = (
-				BB2222220000000000000005 /* AddItemSheet.swift */,
-				CC2222220000000000000003 /* CreateListSheet.swift */,
-				CC2222220000000000000002 /* ListCardView.swift */,
-				CC2222220000000000000004 /* ListDetailView.swift */,
-				BB2222220000000000000006 /* ListItemDetailView.swift */,
-				BB2222220000000000000007 /* ListItemRow.swift */,
-				BB2222220000000000000004 /* SharedListsView.swift */,
-			);
-			path = Lists;
-			sourceTree = "<group>";
-		};
-		DD3333330000000000000001 /* Swipe */ = {
-			isa = PBXGroup;
-			children = (
-				DD2222220000000000000003 /* SwipeCardView.swift */,
-				DD2222220000000000000004 /* SwipeSessionView.swift */,
-				DD2222220000000000000005 /* SwipeTabView.swift */,
-			);
-			path = Swipe;
-			sourceTree = "<group>";
-		};
-		FF3333330000000000000001 /* Settings */ = {
-			isa = PBXGroup;
-			children = (
-				FF2222220000000000000001 /* SettingsView.swift */,
-			);
-			path = Settings;
-			sourceTree = "<group>";
-		};
-		OO3333330000000000000002 /* OurStory */ = {
-			isa = PBXGroup;
-			children = (
-				OO2222220000000000000007 /* AddSignificantDateSheet.swift */,
-				OO2222220000000000000005 /* CoupleProfileHeader.swift */,
-				OO2222220000000000000004 /* OurStoryView.swift */,
-				OO2222220000000000000006 /* SetAnniversarySheet.swift */,
-			);
-			path = OurStory;
 			sourceTree = "<group>";
 		};
 		736DA8C3DB61B9D6A766E5D1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				A9613F75B3DC5B4A5C66B0A4 /* Auth */,
-				EE3333330000000000000001 /* Calendar */,
-				BB3333330000000000000001 /* Lists */,
+				B66D1E85ED1591F71AC060BD /* Calendar */,
+				7A95F64B93AB2E3B642F96F6 /* Lists */,
 				15CE5CDB0E1AC60593D25040 /* Main */,
-				OO3333330000000000000002 /* OurStory */,
+				FBB149CC0030F192CA7E7CFC /* OurStory */,
 				1FF18541C1F0BC4262F8FBFC /* Pairing */,
-				FF3333330000000000000001 /* Settings */,
-				DD3333330000000000000001 /* Swipe */,
-				AA3333330000000000000001 /* Vault */,
+				B9433ED82151973D76203F82 /* Settings */,
+				D884380B97A89E5435AA0F2B /* Swipe */,
+				8008AEA663D576FB3212561D /* Vault */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		7A95F64B93AB2E3B642F96F6 /* Lists */ = {
+			isa = PBXGroup;
+			children = (
+				4335974CDC00C48D0C9E4C32 /* AddItemSheet.swift */,
+				A2616052887D36C66695623A /* CreateListSheet.swift */,
+				914A22A788DACEEA8F24BF7A /* ListCardView.swift */,
+				69125FE78F3DD71C002D672F /* ListDetailView.swift */,
+				7DDC6A1A6DD98ABC4AFE7C12 /* ListItemDetailView.swift */,
+				A33F7E6B896B05377B106CB1 /* ListItemRow.swift */,
+				F86B75EB1F8FE2058AD458A7 /* SharedListsView.swift */,
+			);
+			path = Lists;
+			sourceTree = "<group>";
+		};
+		8008AEA663D576FB3212561D /* Vault */ = {
+			isa = PBXGroup;
+			children = (
+				A69D7F1E8EFE0A4D0379ACEC /* AddFactSheet.swift */,
+				836E8DFB03605EA6DB853B42 /* VaultCategoryView.swift */,
+				1F45A4E3597D9C05C0531080 /* VaultView.swift */,
+			);
+			path = Vault;
 			sourceTree = "<group>";
 		};
 		833A66C8DE830DA9AAEC7973 /* App */ = {
@@ -349,6 +308,35 @@
 			path = Auth;
 			sourceTree = "<group>";
 		};
+		B66D1E85ED1591F71AC060BD /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				4E0EE995098FE144EDFCFB84 /* AddAvailabilitySheet.swift */,
+				6F8997C9964343348BCD4B50 /* DayDetailView.swift */,
+				B6F6586458FE1EF0E936818D /* EventRequestView.swift */,
+				F116FB6AE3F6CEB5DED6A276 /* SharedCalendarView.swift */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
+		B9433ED82151973D76203F82 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				25AC8FBD363C5D55A6C1E2FD /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		D884380B97A89E5435AA0F2B /* Swipe */ = {
+			isa = PBXGroup;
+			children = (
+				9F118E1CD2680DA9A123E2E1 /* SwipeCardView.swift */,
+				1C286C95B1F8452EC0F1C832 /* SwipeSessionView.swift */,
+				B3AD8D80718C3044F1217B76 /* SwipeTabView.swift */,
+			);
+			path = Swipe;
+			sourceTree = "<group>";
+		};
 		D8DD93D235CE76C108ED5197 /* Components */ = {
 			isa = PBXGroup;
 			children = (
@@ -357,6 +345,17 @@
 				85E484A7702E72CAD7E5B381 /* FondrCard.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		FBB149CC0030F192CA7E7CFC /* OurStory */ = {
+			isa = PBXGroup;
+			children = (
+				456D361BE704051273AA8E01 /* AddSignificantDateSheet.swift */,
+				589AFE4DE875A9B17EB3EBC5 /* CoupleProfileHeader.swift */,
+				557D6A4588B45D17194CCC9E /* OurStoryView.swift */,
+				254F7992A2D27D5D673B649F /* SetAnniversarySheet.swift */,
+			);
+			path = OurStory;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -376,9 +375,6 @@
 			);
 			name = Fondr;
 			packageProductDependencies = (
-				3E0F817A7893395B233AAD6A /* FirebaseAuth */,
-				5C6C9BEF6772CE4CB31606DF /* FirebaseFirestore */,
-				OO3333330000000000000001 /* FirebaseStorage */,
 			);
 			productName = Fondr;
 			productReference = 3946E691AC38A28A460A73FB /* Fondr.app */;
@@ -408,9 +404,6 @@
 			);
 			mainGroup = 9029A75B047CD41D26948EE1;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0056EE2230222B764153C86A /* Products */;
 			projectDirPath = "";
@@ -427,7 +420,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E7FE64C43B5CD7217913563A /* Assets.xcassets in Resources */,
-				5894D3EB2F69BD7C00B2D64B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -438,61 +430,64 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				042ABB2F7F277E4477BB94FE /* APIClient.swift in Sources */,
+				E240EF455133F02C80395F97 /* AddAvailabilitySheet.swift in Sources */,
+				E5905C463CEE32038C80237E /* AddFactSheet.swift in Sources */,
+				04FB782626F29F4C48C79FFB /* AddItemSheet.swift in Sources */,
+				B3632E7D63CC47CC6BD68250 /* AddSignificantDateSheet.swift in Sources */,
 				8A48554ACD21943FA92BA3CA /* AppState.swift in Sources */,
 				6928E9B3A246A50791A0DAF5 /* AuthService.swift in Sources */,
+				09D4C7A234974B0FDA001353 /* AvailabilitySlot.swift in Sources */,
+				6FE5C0D26447A1E2E225AE9A /* CalendarService.swift in Sources */,
 				30BD5C650537B80A6CC4529E /* Color+Fondr.swift in Sources */,
 				6F8B6BCDD40A691A36A37B01 /* Constants.swift in Sources */,
 				3F95A0CE6D2E5787C49F3947 /* ContentView.swift in Sources */,
+				40C04ACCD94ADE17E304D499 /* CoupleProfileHeader.swift in Sources */,
+				3F7950C25EA58567AAD47AB1 /* CreateListSheet.swift in Sources */,
 				8525A0EC733A062D45736664 /* CreatePairView.swift in Sources */,
+				230240E3F9ACE4DFFD2DBDC0 /* DayDetailView.swift in Sources */,
 				8B6A93706BE75A43BF31ECB4 /* EmptyStateView.swift in Sources */,
+				43CD25481442FE584412222D /* EventRequestView.swift in Sources */,
 				2473560281074E833E07F20D /* FondrApp.swift in Sources */,
 				610D93DD3BF5388EBB9F9717 /* FondrButton.swift in Sources */,
 				27B2D5EC6404B56B104C32EB /* FondrCard.swift in Sources */,
+				42E668B22516024354AA4E58 /* HapticManager.swift in Sources */,
 				4A1E5D4D1DAEDADCF4295887 /* JoinPairView.swift in Sources */,
+				C0DE7291A6B3A710021599C9 /* ListCardView.swift in Sources */,
+				78910672A04651F0A486AC8A /* ListDetailView.swift in Sources */,
+				5DB3DA75CCE6BC6806B9ED61 /* ListItem.swift in Sources */,
+				C3E6EDA00CC12A517A1C9BA4 /* ListItemDetailView.swift in Sources */,
+				5C6C3BEB7B54FF4FE0D30623 /* ListItemRow.swift in Sources */,
+				66DDB8F45B00A83BD3329B34 /* ListService.swift in Sources */,
 				E2DD7DBB24DBB8361EE84DC4 /* MainTabView.swift in Sources */,
+				D9551FE13FF6A42C0FDFF034 /* NotificationService.swift in Sources */,
 				89A42A2302679C098A887639 /* OnboardingView.swift in Sources */,
+				76625BD7C291B3E3200D0E48 /* OurStoryService.swift in Sources */,
+				5D8517408A87395180551577 /* OurStoryView.swift in Sources */,
 				560C5C124C5D8BC2FC33735F /* Pair.swift in Sources */,
 				8D15AD7193B4EE0B48CEB5AE /* PairService.swift in Sources */,
+				4925705044E0D80B415EB9CC /* ProfileImageService.swift in Sources */,
+				29830366D0A7A1A37851BBBE /* SessionService.swift in Sources */,
+				5C5888BC88394883822C8F75 /* SetAnniversarySheet.swift in Sources */,
+				82338C703E3482FAEC9C9688 /* SettingsView.swift in Sources */,
+				2E3DF13C4BE052F9EACBE503 /* SharedCalendarView.swift in Sources */,
+				B7DAC5A04ED4AB1A6CD81CEB /* SharedList.swift in Sources */,
+				98DF8827D2F0D188394BDF55 /* SharedListsView.swift in Sources */,
 				095B99DEA99DF72924E98737 /* SignInView.swift in Sources */,
 				D262D8329E18F2B7515B5138 /* SignUpView.swift in Sources */,
+				F3D0336F3C5859D9FD92BB62 /* SignificantDate.swift in Sources */,
+				7B236BAA381F0FCA677B2998 /* SwipeCardView.swift in Sources */,
+				DF7F4839D69FABA7F7A09D6A /* SwipeSession.swift in Sources */,
+				4D6DCEF5024A123717AA85F8 /* SwipeSessionView.swift in Sources */,
+				45C47A2F5DDBFDAD8D308DD5 /* SwipeTabView.swift in Sources */,
+				E45557D5D7F245E3585E13A9 /* TMDBService.swift in Sources */,
+				ED36B57899E4D5870B6C00E0 /* TokenStore.swift in Sources */,
 				B708186E0275B620B5195C2C /* User.swift in Sources */,
-				AA1111110000000000000001 /* VaultFact.swift in Sources */,
-				AA1111110000000000000002 /* VaultService.swift in Sources */,
-				AA1111110000000000000003 /* AddFactSheet.swift in Sources */,
-				AA1111110000000000000004 /* VaultView.swift in Sources */,
-				AA1111110000000000000005 /* VaultCategoryView.swift in Sources */,
-				BB1111110000000000000001 /* ListItem.swift in Sources */,
-				BB1111110000000000000002 /* ListService.swift in Sources */,
-				BB1111110000000000000003 /* TMDBService.swift in Sources */,
-				BB1111110000000000000004 /* SharedListsView.swift in Sources */,
-				BB1111110000000000000005 /* AddItemSheet.swift in Sources */,
-				BB1111110000000000000006 /* ListItemDetailView.swift in Sources */,
-				BB1111110000000000000007 /* ListItemRow.swift in Sources */,
-				CC1111110000000000000001 /* SharedList.swift in Sources */,
-				CC1111110000000000000002 /* ListCardView.swift in Sources */,
-				CC1111110000000000000003 /* CreateListSheet.swift in Sources */,
-				CC1111110000000000000004 /* ListDetailView.swift in Sources */,
-				DD1111110000000000000001 /* SwipeSession.swift in Sources */,
-				DD1111110000000000000002 /* SessionService.swift in Sources */,
-				DD1111110000000000000003 /* SwipeCardView.swift in Sources */,
-				DD1111110000000000000004 /* SwipeSessionView.swift in Sources */,
-				DD1111110000000000000005 /* SwipeTabView.swift in Sources */,
-				EE1111110000000000000001 /* AvailabilitySlot.swift in Sources */,
-				EE1111110000000000000002 /* CalendarService.swift in Sources */,
-				EE1111110000000000000003 /* SharedCalendarView.swift in Sources */,
-				EE1111110000000000000004 /* DayDetailView.swift in Sources */,
-				EE1111110000000000000005 /* AddAvailabilitySheet.swift in Sources */,
-				EE1111110000000000000006 /* EventRequestView.swift in Sources */,
-				FF1111110000000000000001 /* SettingsView.swift in Sources */,
-				FF1111110000000000000002 /* HapticManager.swift in Sources */,
-				FF1111110000000000000003 /* NotificationService.swift in Sources */,
-				OO1111110000000000000001 /* SignificantDate.swift in Sources */,
-				OO1111110000000000000002 /* OurStoryService.swift in Sources */,
-				OO1111110000000000000003 /* ProfileImageService.swift in Sources */,
-				OO1111110000000000000004 /* OurStoryView.swift in Sources */,
-				OO1111110000000000000005 /* CoupleProfileHeader.swift in Sources */,
-				OO1111110000000000000006 /* SetAnniversarySheet.swift in Sources */,
-				OO1111110000000000000007 /* AddSignificantDateSheet.swift in Sources */,
+				C05A1ABE0598DF494CD162A9 /* VaultCategoryView.swift in Sources */,
+				AAA05FFDDE125930337D2C05 /* VaultFact.swift in Sources */,
+				0D1847B7BEC87225CBB32647 /* VaultService.swift in Sources */,
+				B38ED8E5A6900210BB31A44F /* VaultView.swift in Sources */,
+				F22F9FB147A0C40F044887FA /* WebSocketManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -511,7 +506,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Fondr;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor" = LaunchBackground;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -657,7 +651,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Fondr;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor" = LaunchBackground;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -694,35 +687,6 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		3E0F817A7893395B233AAD6A /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
-		};
-		5C6C9BEF6772CE4CB31606DF /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-		OO3333330000000000000001 /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BAF23927016D3974E2EEE162 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 23742D1AB76EDED2B266294B /* Project object */;
 }

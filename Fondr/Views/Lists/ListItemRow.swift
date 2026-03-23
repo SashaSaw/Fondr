@@ -6,7 +6,7 @@ struct ListItemRow: View {
     @Environment(AppState.self) private var appState
 
     private var addedByText: String {
-        if item.addedBy == appState.authService.currentUser?.uid {
+        if item.addedBy == appState.authService.currentUserId {
             return "Added by you"
         } else {
             return "Added by \(appState.partnerName ?? "partner")"

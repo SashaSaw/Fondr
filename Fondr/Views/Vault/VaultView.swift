@@ -110,7 +110,7 @@ struct FactRow: View {
     @State private var showDeleteConfirmation = false
 
     private var addedByText: String {
-        if fact.addedBy == appState.authService.currentUser?.uid {
+        if fact.addedBy == appState.authService.currentUserId {
             return "Added by you"
         } else {
             return "Added by \(appState.partnerName ?? "partner")"
@@ -142,9 +142,7 @@ struct FactRow: View {
         }
         .confirmationDialog("Delete this fact?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
-                if let id = fact.id {
-                    vaultService.deleteFact(factId: id)
-                }
+                vaultService.deleteFact(factId: fact.id)
             }
         }
         .sheet(isPresented: $showEditSheet) {

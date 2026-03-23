@@ -12,7 +12,7 @@ struct ListItemDetailView: View {
     @State private var completionNote = ""
 
     private var addedByText: String {
-        if item.addedBy == appState.authService.currentUser?.uid {
+        if item.addedBy == appState.authService.currentUserId {
             return "Added by you"
         } else {
             return "Added by \(appState.partnerName ?? "partner")"
@@ -125,18 +125,14 @@ struct ListItemDetailView: View {
         }
         .confirmationDialog("Delete this item?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
-                if let id = item.id {
-                    listService.deleteItem(itemId: id)
-                    dismiss()
-                }
+                listService.deleteItem(itemId: item.id)
+                dismiss()
             }
         }
         .alert("Mark as Done", isPresented: $showMarkDoneAlert) {
             TextField("Add a note (optional)", text: $completionNote)
             Button("Done") {
-                if let id = item.id {
-                    listService.markAsDone(itemId: id, note: completionNote.isEmpty ? nil : completionNote)
-                }
+                listService.markAsDone(itemId: item.id, note: completionNote.isEmpty ? nil : completionNote)
             }
             Button("Cancel", role: .cancel) {}
         } message: {

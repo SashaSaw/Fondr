@@ -1,5 +1,5 @@
 import SwiftUI
-import FirebaseFirestore
+import Foundation
 
 struct SwipeSessionView: View {
     let session: SwipeSession
@@ -110,9 +110,7 @@ struct SwipeSessionView: View {
         .padding(.top, 8)
         .confirmationDialog("Leave session?", isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
             Button("Discard Session", role: .destructive) {
-                if let id = session.id {
-                    sessionService.discardSession(sessionId: id)
-                }
+                sessionService.discardSession(sessionId: session.id)
                 onDismiss()
             }
             Button("Keep for Later", role: .cancel) {
@@ -475,7 +473,7 @@ struct SwipeSessionView: View {
     // MARK: - Result Actions
 
     private func confirmChoice(itemId: String) {
-        guard let sessionId = session.id else { return }
+        let sessionId = session.id
         sessionService.chooseMatch(
             sessionId: sessionId,
             chosenItemId: itemId,
@@ -488,39 +486,31 @@ struct SwipeSessionView: View {
     }
 
     private func restartSession() {
-        if let sessionId = session.id {
-            // Revert all matches back to suggested before discarding
-            for matchId in session.matches {
-                Task {
-                    await revertItemStatus(itemId: matchId)
-                }
+        let sessionId = session.id
+        // Revert all matches back to suggested before discarding
+        for matchId in session.matches {
+            Task {
+                await revertItemStatus(itemId: matchId)
             }
-            sessionService.discardSession(sessionId: sessionId)
         }
+        sessionService.discardSession(sessionId: sessionId)
         onDismiss()
     }
 
     private func revertItemStatus(itemId: String) async {
         guard let pairId = appState.pairService.currentPair?.id else { return }
-        let db = Firestore.firestore()
-        try? await db.collection(Constants.Firestore.pairsCollection)
-            .document(pairId)
-            .collection(Constants.Lists.collection)
-            .document(itemId)
-            .updateData([
-                "status": ItemStatus.suggested.rawValue,
-                "updatedAt": Date()
-            ])
+        let body = ItemStatusUpdate(status: ItemStatus.suggested.rawValue)
+        let _: ListItem? = try? await APIClient.shared.patch("/pairs/\(pairId)/items/\(itemId)", body: body)
     }
 
     // MARK: - Actions
 
     private func handleSwipe(direction: String) {
-        guard myProgress < sortedItems.count,
-              let sessionId = session.id else { return }
+        guard myProgress < sortedItems.count else { return }
+        let sessionId = session.id
 
         let currentItem = sortedItems[myProgress]
-        guard let itemId = currentItem.id else { return }
+        let itemId = currentItem.id
 
         sessionService.submitSwipe(sessionId: sessionId, itemId: itemId, direction: direction)
 
@@ -532,7 +522,7 @@ struct SwipeSessionView: View {
         if direction == "right" && partnerSwipes {
             // Check partner's swipe on this item
             let pair = appState.pairService.currentPair
-            let isUserA = appState.authService.currentUser?.uid == pair?.userA
+            let isUserA = appState.authService.currentUserId == pair?.userA
             let otherSwipes = isUserA ? session.swipesB : session.swipesA
             if otherSwipes[itemId] == "right" {
                 matchedItemTitle = currentItem.title

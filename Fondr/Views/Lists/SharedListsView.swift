@@ -6,7 +6,7 @@ struct SharedListsView: View {
     @State private var showCreateSheet = false
 
     private var partnerName: String {
-        appState.authService.appUser?.partnerName ?? "your partner"
+        appState.partnerName ?? "your partner"
     }
 
     private let columns = [
@@ -35,8 +35,8 @@ struct SharedListsView: View {
                             } label: {
                                 ListCardView(
                                     list: list,
-                                    itemCount: listService.itemCount(for: list.id ?? ""),
-                                    matchedCount: listService.matchedCount(for: list.id ?? "")
+                                    itemCount: listService.itemCount(for: list.id),
+                                    matchedCount: listService.matchedCount(for: list.id)
                                 )
                             }
                             .buttonStyle(ListCardButtonStyle())

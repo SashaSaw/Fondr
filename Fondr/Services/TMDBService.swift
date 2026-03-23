@@ -6,36 +6,27 @@ final class TMDBService {
     var isSearching = false
 
     var isConfigured: Bool {
-        !Constants.TMDB.apiKey.isEmpty
+        true // TMDB is now proxied through the backend — always available
     }
 
     func search(query: String) async {
-        guard isConfigured, !query.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else { return }
 
         await MainActor.run { isSearching = true }
 
         do {
-            var components = URLComponents(string: "\(Constants.TMDB.baseUrl)/search/movie")!
-            components.queryItems = [
-                URLQueryItem(name: "api_key", value: Constants.TMDB.apiKey),
-                URLQueryItem(name: "query", value: query),
-                URLQueryItem(name: "page", value: "1")
-            ]
-
-            let (data, _) = try await URLSession.shared.data(from: components.url!)
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            let response = try decoder.decode(TMDBResponse.self, from: data)
+            let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
+            let response: TMDBSearchResponse = try await APIClient.shared.get("/tmdb/search?query=\(encoded)")
 
             await MainActor.run {
-                self.searchResults = response.results.prefix(10).map { movie in
+                self.searchResults = response.results.map { movie in
                     TMDBResult(
-                        id: movie.id,
+                        id: movie.tmdbId,
                         title: movie.title,
-                        posterPath: movie.posterPath,
-                        year: String(movie.releaseDate?.prefix(4) ?? ""),
+                        posterPath: movie.posterUrl,
+                        year: movie.year ?? "",
                         overview: movie.overview,
-                        rating: movie.voteAverage
+                        rating: movie.rating
                     )
                 }
                 self.isSearching = false
@@ -53,7 +44,7 @@ final class TMDBService {
     }
 
     static func posterUrl(path: String) -> URL? {
-        URL(string: "\(Constants.TMDB.imageBaseUrl)\(path)")
+        URL(string: path)
     }
 }
 
@@ -68,15 +59,15 @@ struct TMDBResult: Identifiable {
     let rating: Double?
 }
 
-private struct TMDBResponse: Decodable {
+private struct TMDBSearchResponse: Decodable {
     let results: [TMDBMovie]
 }
 
 private struct TMDBMovie: Decodable {
-    let id: Int
+    let tmdbId: Int
     let title: String
-    let posterPath: String?
-    let releaseDate: String?
+    let year: String?
     let overview: String?
-    let voteAverage: Double?
+    let posterUrl: String?
+    let rating: Double?
 }

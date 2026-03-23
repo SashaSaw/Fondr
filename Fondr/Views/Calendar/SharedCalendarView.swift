@@ -1,5 +1,5 @@
 import SwiftUI
-import FirebaseAuth
+import Foundation
 
 struct SharedCalendarView: View {
     @Environment(CalendarService.self) private var calendarService
@@ -445,7 +445,7 @@ struct SharedCalendarView: View {
     @State private var declineReasonFor: String?
     @State private var declineReasonText: String = ""
 
-    private var currentUid: String? { Auth.auth().currentUser?.uid }
+    private var currentUid: String? { TokenStore.shared.userId }
 
     private var upcomingEventsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -476,9 +476,7 @@ struct SharedCalendarView: View {
                                 }
                                 Spacer()
                                 Button(role: .destructive) {
-                                    if let id = event.id {
-                                        calendarService.deleteEvent(eventId: id)
-                                    }
+                                    calendarService.deleteEvent(eventId: event.id)
                                 } label: {
                                     Image(systemName: "trash")
                                         .font(.caption)
@@ -512,11 +510,9 @@ struct SharedCalendarView: View {
                                             .font(.system(.caption, design: .rounded))
                                             .textFieldStyle(.roundedBorder)
                                         Button("Send") {
-                                            if let id = event.id {
-                                                calendarService.respondToEvent(eventId: id, accepted: false, reason: declineReasonText.isEmpty ? nil : declineReasonText)
-                                                declineReasonFor = nil
-                                                declineReasonText = ""
-                                            }
+                                            calendarService.respondToEvent(eventId: event.id, accepted: false, reason: declineReasonText.isEmpty ? nil : declineReasonText)
+                                            declineReasonFor = nil
+                                            declineReasonText = ""
                                         }
                                         .font(.system(.caption, design: .rounded, weight: .medium))
                                         Button("Cancel") {
@@ -528,9 +524,7 @@ struct SharedCalendarView: View {
                                 } else {
                                     HStack(spacing: 12) {
                                         Button {
-                                            if let id = event.id {
-                                                calendarService.respondToEvent(eventId: id, accepted: true, reason: nil)
-                                            }
+                                            calendarService.respondToEvent(eventId: event.id, accepted: true, reason: nil)
                                         } label: {
                                             Label("Accept", systemImage: "checkmark")
                                                 .font(.system(.caption, design: .rounded, weight: .medium))

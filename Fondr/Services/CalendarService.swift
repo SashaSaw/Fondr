@@ -1,6 +1,4 @@
 import Foundation
-import FirebaseAuth
-import FirebaseFirestore
 
 @Observable
 final class CalendarService {
@@ -9,30 +7,22 @@ final class CalendarService {
     var partnerTimezone: String?
     var errorMessage: String?
 
-    private var slotsListener: ListenerRegistration?
-    private var eventsListener: ListenerRegistration?
     private var currentPairId: String?
-    private var db: Firestore { Firestore.firestore() }
-
-    deinit {
-        slotsListener?.remove()
-        eventsListener?.remove()
-    }
 
     // MARK: - Computed
 
     var mySlots: [AvailabilitySlot] {
-        guard let uid = Auth.auth().currentUser?.uid else { return [] }
+        guard let uid = TokenStore.shared.userId else { return [] }
         return slots.filter { $0.userId == uid }
     }
 
     var partnerSlots: [AvailabilitySlot] {
-        guard let uid = Auth.auth().currentUser?.uid else { return [] }
+        guard let uid = TokenStore.shared.userId else { return [] }
         return slots.filter { $0.userId != uid }
     }
 
     var pendingPartnerEvents: [CalendarEvent] {
-        guard let uid = Auth.auth().currentUser?.uid else { return [] }
+        guard let uid = TokenStore.shared.userId else { return [] }
         return events.filter { $0.createdBy != uid && $0.status == .pending }
     }
 
@@ -42,61 +32,48 @@ final class CalendarService {
         stopListening()
         currentPairId = pairId
 
-        let pairRef = db.collection(Constants.Firestore.pairsCollection).document(pairId)
-
-        slotsListener = pairRef
-            .collection(Constants.Calendar.collection)
-            .order(by: "createdAt", descending: false)
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let snapshot else {
-                    self?.errorMessage = error?.localizedDescription
-                    return
-                }
-                self?.slots = snapshot.documents.compactMap { try? $0.data(as: AvailabilitySlot.self) }
-            }
-
-        eventsListener = pairRef
-            .collection(Constants.Calendar.eventsCollection)
-            .order(by: "createdAt", descending: false)
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let self, let snapshot else {
-                    self?.errorMessage = error?.localizedDescription
-                    return
-                }
-                var decoded: [CalendarEvent] = []
-                for doc in snapshot.documents {
-                    do {
-                        let event = try doc.data(as: CalendarEvent.self)
-                        decoded.append(event)
-                    } catch {
-                        print("⚠️ [CalendarService] Failed to decode event \(doc.documentID): \(error)")
-                    }
-                }
-                self.events = decoded
-            }
-
+        // Initial load
         Task {
             do {
-                let doc = try await db.collection(Constants.Firestore.usersCollection)
-                    .document(partnerUid)
-                    .getDocument()
-                let tz = doc.data()?["timezone"] as? String
+                async let loadedSlots: [AvailabilitySlot] = APIClient.shared.get("/pairs/\(pairId)/availability")
+                async let loadedEvents: [CalendarEvent] = APIClient.shared.get("/pairs/\(pairId)/events")
+                let (s, e) = try await (loadedSlots, loadedEvents)
                 await MainActor.run {
-                    self.partnerTimezone = tz
+                    self.slots = s
+                    self.events = e
                 }
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
+        }
+
+        // WebSocket events
+        WebSocketManager.shared.on("availability:created") { [weak self] (slot: AvailabilitySlot) in
+            self?.slots.removeAll { $0.userId == slot.userId && $0.date == slot.date }
+            self?.slots.append(slot)
+        }
+        WebSocketManager.shared.on("availability:updated") { [weak self] (slot: AvailabilitySlot) in
+            if let i = self?.slots.firstIndex(where: { $0.id == slot.id }) {
+                self?.slots[i] = slot
+            }
+        }
+        WebSocketManager.shared.on("availability:deleted") { [weak self] (payload: DeletePayload) in
+            self?.slots.removeAll { $0.id == payload.id }
+        }
+        WebSocketManager.shared.on("event:created") { [weak self] (event: CalendarEvent) in
+            self?.events.append(event)
+        }
+        WebSocketManager.shared.on("event:updated") { [weak self] (event: CalendarEvent) in
+            if let i = self?.events.firstIndex(where: { $0.id == event.id }) {
+                self?.events[i] = event
+            }
+        }
+        WebSocketManager.shared.on("event:deleted") { [weak self] (payload: DeletePayload) in
+            self?.events.removeAll { $0.id == payload.id }
         }
     }
 
     func stopListening() {
-        slotsListener?.remove()
-        slotsListener = nil
-        eventsListener?.remove()
-        eventsListener = nil
         slots = []
         events = []
         partnerTimezone = nil
@@ -106,57 +83,37 @@ final class CalendarService {
     // MARK: - Availability CRUD
 
     func toggleAvailability(for date: Date) {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let uid = TokenStore.shared.userId else { return }
         let dateStr = dateString(from: date)
 
         if let existingIndex = slots.firstIndex(where: { $0.userId == uid && $0.date == dateStr }) {
             let existing = slots[existingIndex]
             slots.remove(at: existingIndex) // Optimistic remove
-            if let slotId = existing.id {
-                deleteSlot(slotId: slotId)
-            }
+            deleteSlot(slotId: existing.id)
         } else {
-            var slot = AvailabilitySlot(
-                userId: uid,
-                date: dateStr,
-                startTime: nil,
-                endTime: nil,
-                label: nil,
-                createdAt: Date()
-            )
-            slot.id = UUID().uuidString // Temp local id for immediate UI
+            var slot = AvailabilitySlot(userId: uid, date: dateStr)
+            slot.id = UUID().uuidString // Temp local id
             slots.append(slot) // Optimistic add
-            addSlotToFirestore(slot)
+            createSlot(date: dateStr, startTime: nil, endTime: nil, label: nil)
         }
     }
 
     func setTimeRange(for date: Date, start: String, end: String, label: String?) {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let uid = TokenStore.shared.userId else { return }
         let dateStr = dateString(from: date)
 
-        if let existing = slots.first(where: { $0.userId == uid && $0.date == dateStr }),
-           let slotId = existing.id {
+        if let existing = slots.first(where: { $0.userId == uid && $0.date == dateStr }) {
             Task {
                 do {
-                    try await slotRef(slotId).updateData([
-                        "startTime": start,
-                        "endTime": end,
-                        "label": label as Any
-                    ])
+                    guard let pairId = currentPairId else { return }
+                    let body = UpdateSlotBody(startTime: start, endTime: end, label: label)
+                    let _: AvailabilitySlot = try await APIClient.shared.patch("/pairs/\(pairId)/availability/\(existing.id)", body: body)
                 } catch {
                     await MainActor.run { self.errorMessage = error.localizedDescription }
                 }
             }
         } else {
-            let slot = AvailabilitySlot(
-                userId: uid,
-                date: dateStr,
-                startTime: start,
-                endTime: end,
-                label: label?.isEmpty == true ? nil : label,
-                createdAt: Date()
-            )
-            addSlotToFirestore(slot)
+            createSlot(date: dateStr, startTime: start, endTime: end, label: label?.isEmpty == true ? nil : label)
         }
     }
 
@@ -164,11 +121,7 @@ final class CalendarService {
         guard let pairId = currentPairId else { return }
         Task {
             do {
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Calendar.collection)
-                    .document(slotId)
-                    .delete()
+                try await APIClient.shared.delete("/pairs/\(pairId)/availability/\(slotId)")
             } catch {
                 await MainActor.run { self.errorMessage = error.localizedDescription }
             }
@@ -185,33 +138,39 @@ final class CalendarService {
         return slots.first { $0.userId == userId && $0.date == dateStr }
     }
 
+    func removeMySlots(for dateStrings: [String]) {
+        guard let uid = TokenStore.shared.userId else { return }
+        for dateStr in dateStrings {
+            if let index = slots.firstIndex(where: { $0.userId == uid && $0.date == dateStr }) {
+                let slotId = slots[index].id
+                slots.remove(at: index)
+                deleteSlot(slotId: slotId)
+            }
+        }
+    }
+
     // MARK: - Event CRUD
 
     func addEvent(title: String, description: String?, startDate: String, endDate: String, startTime: String?, endTime: String?) {
-        guard let pairId = currentPairId,
-              let uid = Auth.auth().currentUser?.uid else { return }
+        guard let pairId = currentPairId else { return }
 
         var event = CalendarEvent(
-            title: title,
-            description: description,
-            startDate: startDate,
-            endDate: endDate,
-            startTime: startTime,
-            endTime: endTime,
-            createdBy: uid,
-            createdAt: Date(),
-            status: .pending
+            title: title, description: description,
+            startDate: startDate, endDate: endDate,
+            startTime: startTime, endTime: endTime,
+            createdBy: TokenStore.shared.userId ?? ""
         )
-        event.id = UUID().uuidString // Temp local id for immediate UI
-        events.append(event) // Optimistic add
+        event.id = UUID().uuidString
+        events.append(event) // Optimistic
 
         Task {
             do {
-                let docRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Calendar.eventsCollection)
-                    .document(event.id!)
-                try docRef.setData(from: event)
+                let body = CreateEventBody(
+                    title: title, description: description,
+                    startDate: startDate, endDate: endDate,
+                    startTime: startTime, endTime: endTime
+                )
+                let _: CalendarEvent = try await APIClient.shared.post("/pairs/\(pairId)/events", body: body)
             } catch {
                 await MainActor.run { self.errorMessage = error.localizedDescription }
             }
@@ -222,19 +181,12 @@ final class CalendarService {
         guard let pairId = currentPairId else { return }
         Task {
             do {
-                var data: [String: Any] = [
-                    "title": title,
-                    "startDate": startDate,
-                    "endDate": endDate
-                ]
-                data["description"] = description as Any
-                data["startTime"] = startTime as Any
-                data["endTime"] = endTime as Any
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Calendar.eventsCollection)
-                    .document(eventId)
-                    .updateData(data)
+                let body = UpdateEventBody(
+                    title: title, description: description,
+                    startDate: startDate, endDate: endDate,
+                    startTime: startTime, endTime: endTime
+                )
+                let _: CalendarEvent = try await APIClient.shared.patch("/pairs/\(pairId)/events/\(eventId)", body: body)
             } catch {
                 await MainActor.run { self.errorMessage = error.localizedDescription }
             }
@@ -242,8 +194,7 @@ final class CalendarService {
     }
 
     func respondToEvent(eventId: String, accepted: Bool, reason: String?) {
-        guard let pairId = currentPairId,
-              let uid = Auth.auth().currentUser?.uid else { return }
+        guard let pairId = currentPairId else { return }
 
         // Optimistic update
         if let index = events.firstIndex(where: { $0.id == eventId }) {
@@ -254,78 +205,21 @@ final class CalendarService {
 
         Task {
             do {
-                var data: [String: Any] = [
-                    "status": accepted ? EventStatus.accepted.rawValue : EventStatus.declined.rawValue,
-                    "respondedAt": FieldValue.serverTimestamp()
-                ]
-                if let reason, !reason.isEmpty {
-                    data["declineReason"] = reason
-                }
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Calendar.eventsCollection)
-                    .document(eventId)
-                    .updateData(data)
-
-                // If accepted, create availability slots for each date in the event range
-                if accepted, let event = self.events.first(where: { $0.id == eventId }) {
-                    await self.createSlotsForEventRange(event: event, userId: uid, pairId: pairId)
-                }
+                let body = RespondBody(accepted: accepted, reason: reason)
+                let _: CalendarEvent = try await APIClient.shared.post("/pairs/\(pairId)/events/\(eventId)/respond", body: body)
             } catch {
                 await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
 
-    private func createSlotsForEventRange(event: CalendarEvent, userId: String, pairId: String) async {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-
-        guard var current = formatter.date(from: event.startDate),
-              let end = formatter.date(from: event.endDate) else { return }
-
-        let calendar = Foundation.Calendar.current
-        let colRef = db.collection(Constants.Firestore.pairsCollection)
-            .document(pairId)
-            .collection(Constants.Calendar.collection)
-
-        while current <= end {
-            let dateStr = formatter.string(from: current)
-            // Only create if user doesn't already have a slot for this date
-            let exists = slots.contains { $0.userId == userId && $0.date == dateStr }
-            if !exists {
-                let slot = AvailabilitySlot(
-                    userId: userId,
-                    date: dateStr,
-                    startTime: event.startTime,
-                    endTime: event.endTime,
-                    label: event.title,
-                    createdAt: Date()
-                )
-                do {
-                    try colRef.addDocument(from: slot)
-                } catch {
-                    await MainActor.run { self.errorMessage = error.localizedDescription }
-                }
-            }
-            guard let next = calendar.date(byAdding: .day, value: 1, to: current) else { break }
-            current = next
-        }
-    }
-
     func deleteEvent(eventId: String) {
         guard let pairId = currentPairId else { return }
-
-        // Optimistic removal so UI updates immediately
-        events.removeAll { $0.id == eventId }
+        events.removeAll { $0.id == eventId } // Optimistic
 
         Task {
             do {
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Calendar.eventsCollection)
-                    .document(eventId)
-                    .delete()
+                try await APIClient.shared.delete("/pairs/\(pairId)/events/\(eventId)")
             } catch {
                 await MainActor.run { self.errorMessage = error.localizedDescription }
             }
@@ -346,7 +240,7 @@ final class CalendarService {
     // MARK: - Query Helpers
 
     func availabilityForMonth(year: Int, month: Int) -> [String: (mine: AvailabilitySlot?, partner: AvailabilitySlot?)] {
-        guard let uid = Auth.auth().currentUser?.uid else { return [:] }
+        guard let uid = TokenStore.shared.userId else { return [:] }
         let prefix = String(format: "%04d-%02d", year, month)
 
         var result: [String: (mine: AvailabilitySlot?, partner: AvailabilitySlot?)] = [:]
@@ -365,7 +259,7 @@ final class CalendarService {
     }
 
     func overlapsForDate(_ date: Date) -> [OverlapBlock] {
-        guard let uid = Auth.auth().currentUser?.uid else { return [] }
+        guard let uid = TokenStore.shared.userId else { return [] }
         let dateStr = dateString(from: date)
 
         let mySlot = slots.first { $0.userId == uid && $0.date == dateStr && $0.startTime != nil && $0.endTime != nil }
@@ -399,7 +293,7 @@ final class CalendarService {
         guard parts.count == 2 else { return timeString }
 
         let utcCalendar = {
-            var cal = Foundation.Calendar.current
+            var cal = Calendar.current
             cal.timeZone = TimeZone(identifier: "UTC")!
             return cal
         }()
@@ -420,7 +314,7 @@ final class CalendarService {
     func localToUtc(_ timeString: Date, on date: Date, timezone: String) -> String {
         guard let tz = TimeZone(identifier: timezone) else { return "00:00" }
 
-        var localCal = Foundation.Calendar.current
+        var localCal = Calendar.current
         localCal.timeZone = tz
 
         let timeComps = localCal.dateComponents([.hour, .minute], from: timeString)
@@ -451,24 +345,53 @@ final class CalendarService {
         return formatter.string(from: date)
     }
 
-    private func addSlotToFirestore(_ slot: AvailabilitySlot) {
+    private func createSlot(date: String, startTime: String?, endTime: String?, label: String?) {
         guard let pairId = currentPairId else { return }
         Task {
             do {
-                let colRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Calendar.collection)
-                try colRef.addDocument(from: slot)
+                let body = CreateSlotBody(date: date, startTime: startTime, endTime: endTime, label: label)
+                let _: AvailabilitySlot = try await APIClient.shared.post("/pairs/\(pairId)/availability", body: body)
             } catch {
                 await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
+}
 
-    private func slotRef(_ slotId: String) -> DocumentReference {
-        db.collection(Constants.Firestore.pairsCollection)
-            .document(currentPairId ?? "")
-            .collection(Constants.Calendar.collection)
-            .document(slotId)
-    }
+// MARK: - Request DTOs
+
+private struct CreateSlotBody: Encodable {
+    let date: String
+    let startTime: String?
+    let endTime: String?
+    let label: String?
+}
+
+private struct UpdateSlotBody: Encodable {
+    let startTime: String
+    let endTime: String
+    let label: String?
+}
+
+private struct CreateEventBody: Encodable {
+    let title: String
+    let description: String?
+    let startDate: String
+    let endDate: String
+    let startTime: String?
+    let endTime: String?
+}
+
+private struct UpdateEventBody: Encodable {
+    let title: String?
+    let description: String?
+    let startDate: String?
+    let endDate: String?
+    let startTime: String?
+    let endTime: String?
+}
+
+private struct RespondBody: Encodable {
+    let accepted: Bool
+    let reason: String?
 }

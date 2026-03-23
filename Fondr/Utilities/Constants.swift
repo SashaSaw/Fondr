@@ -10,18 +10,12 @@ enum Constants {
         static let bundleID = "com.incept5.Fondr"
     }
 
-    enum Firestore {
-        static let usersCollection = "users"
-        static let pairsCollection = "pairs"
-    }
-
     enum Pairing {
         static let codeLength = 6
         static let codeCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     }
 
     enum Vault {
-        static let collection = "vault"
         static let labelSuggestions: [FactCategory: [String]] = [
             .basics: [
                 "Birthday", "Anniversary", "Love Language", "Zodiac Sign",
@@ -38,30 +32,16 @@ enum Constants {
         ]
     }
 
-    enum Lists {
-        static let collection = "lists"
-        static let metaCollection = "lists-meta"
-    }
-
-    enum Sessions {
-        static let collection = "sessions"
-    }
-
     enum TMDB {
-        static let apiKey = ""
-        static let baseUrl = "https://api.themoviedb.org/3"
         static let imageBaseUrl = "https://image.tmdb.org/t/p/w500"
     }
 
     enum Calendar {
-        static let collection = "availability"
-        static let eventsCollection = "events"
         static let defaultStartHour = 8
         static let defaultEndHour = 23
     }
 
     enum OurStory {
-        static let significantDatesCollection = "significantDates"
         static let maxImageDimension: CGFloat = 500
         static let jpegCompression: CGFloat = 0.7
     }

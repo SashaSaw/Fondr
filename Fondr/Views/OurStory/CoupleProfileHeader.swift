@@ -1,6 +1,6 @@
 import SwiftUI
 import PhotosUI
-import FirebaseFirestore
+import Foundation
 
 struct CoupleProfileHeader: View {
     @Environment(ProfileImageService.self) private var profileImageService
@@ -168,15 +168,7 @@ struct CoupleProfileHeader: View {
 
     private func fetchPartnerImage() async {
         guard let partnerUid, partnerImageUrl == nil else { return }
-        do {
-            let doc = try await Firestore.firestore()
-                .collection(Constants.Firestore.usersCollection)
-                .document(partnerUid)
-                .getDocument()
-            let url = doc.data()?["profileImageUrl"] as? String
-            await MainActor.run { partnerImageUrl = url }
-        } catch {
-            // Silently fail — placeholder will show
-        }
+        // Partner image URL comes from the pair data which includes user info
+        // For now, we don't have a separate endpoint — the pair GET includes user data
     }
 }

@@ -185,9 +185,9 @@ struct EventRequestView: View {
     // MARK: - Helpers
 
     private func respondToCurrentEvent(accepted: Bool) {
-        guard let event = currentEvent, let id = event.id else { return }
+        guard let event = currentEvent else { return }
         let reason = accepted ? nil : (declineReason.isEmpty ? nil : declineReason)
-        calendarService.respondToEvent(eventId: id, accepted: accepted, reason: reason)
+        calendarService.respondToEvent(eventId: event.id, accepted: accepted, reason: reason)
 
         // Reset state for next event
         declineMode = false

@@ -1,0 +1,72 @@
+schema: eve/compose/v2
+project: proj_01kmdjz2e5faqrkr1pznxarpwr
+
+registry: "eve"
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: ./backend/Dockerfile
+    ports: ["3000"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${managed.db.url}
+      JWT_SECRET: ${secret.JWT_SECRET}
+      APPLE_CLIENT_ID: ${secret.APPLE_CLIENT_ID}
+      APNS_KEY_ID: ${secret.APNS_KEY_ID}
+      APNS_TEAM_ID: ${secret.APNS_TEAM_ID}
+      APNS_PRIVATE_KEY: ${secret.APNS_PRIVATE_KEY}
+      TMDB_API_KEY: ${secret.TMDB_API_KEY}
+    x-eve:
+      ingress:
+        public: true
+        port: 3000
+      object_store:
+        buckets:
+          - name: uploads
+            visibility: private
+            cors:
+              origins: ["*"]
+              methods: [GET, PUT, HEAD]
+              max_age_seconds: 3600
+
+  db:
+    x-eve:
+      role: managed_db
+      managed:
+        class: db.p1
+        engine: postgres
+        engine_version: "16"
+
+  migrate:
+    image: public.ecr.aws/w7c4v0w3/eve-horizon/migrate:latest
+    environment:
+      DATABASE_URL: ${managed.db.url}
+      MIGRATIONS_DIR: /migrations
+    x-eve:
+      role: job
+      files:
+        - source: backend/prisma/migrations
+          target: /migrations
+
+environments:
+  sandbox:
+    pipeline: deploy
+
+pipelines:
+  deploy:
+    steps:
+      - name: build
+        action: { type: build }
+      - name: release
+        depends_on: [build]
+        action: { type: release }
+      - name: deploy
+        depends_on: [release]
+        action: { type: deploy, env_name: sandbox }
+      - name: migrate
+        depends_on: [deploy]
+        action:
+          type: job
+          service: migrate

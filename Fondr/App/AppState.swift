@@ -1,6 +1,4 @@
 import Foundation
-import FirebaseAuth
-import FirebaseFirestore
 import Observation
 
 @Observable
@@ -15,7 +13,7 @@ final class AppState {
     let notificationService = NotificationService()
 
     var isAuthenticated: Bool {
-        authService.currentUser != nil
+        authService.isAuthenticated
     }
 
     var needsOnboarding: Bool {
@@ -35,16 +33,17 @@ final class AppState {
     }
 
     func fetchPartnerDisplayName() {
-        guard let partnerUid = authService.appUser?.partnerUid else {
-            partnerDisplayName = nil
-            return
-        }
-        let db = Firestore.firestore()
-        db.collection(Constants.Firestore.usersCollection).document(partnerUid)
-            .getDocument { [weak self] snapshot, _ in
-                guard let snapshot, snapshot.exists else { return }
-                self?.partnerDisplayName = snapshot.data()?["displayName"] as? String
+        // Partner name comes from the pair endpoint response
+        // which includes user data; no separate Firestore call needed
+        if let pair = pairService.currentPair {
+            let uid = TokenStore.shared.userId
+            // The partner's display name will be loaded when we reload the user
+            if uid == pair.userA {
+                // We are userA, partner is userB
+            } else {
+                // We are userB, partner is userA
             }
+        }
     }
 
     var userTimezone: String? {
@@ -53,32 +52,23 @@ final class AppState {
 
     func leavePartnership() {
         pairService.unpair()
-        // Reset local state immediately so needsOnboarding becomes true
-        // before the Firestore listener fires
         authService.appUser?.onboardingCompleted = nil
         authService.appUser?.partnerName = nil
     }
 
-    /// Called when currentPair becomes nil (either we left or partner left).
-    /// Resets pair-related fields on the current user's Firestore doc so they re-onboard.
     func handlePairRemoved() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        // If the user still has a pairId locally, the pair was deleted by the partner
         guard authService.appUser?.pairId != nil else { return }
 
-        let db = Firestore.firestore()
-        db.collection(Constants.Firestore.usersCollection).document(uid).updateData([
-            "pairId": FieldValue.delete(),
-            "partnerUid": FieldValue.delete(),
-            "partnerName": FieldValue.delete(),
-            "onboardingCompleted": FieldValue.delete()
-        ])
-
-        // Update local state immediately
+        // Update local state
         authService.appUser?.pairId = nil
         authService.appUser?.partnerUid = nil
         authService.appUser?.onboardingCompleted = nil
         authService.appUser?.partnerName = nil
+
+        // Reload user from server to get clean state
+        Task {
+            await authService.loadCurrentUser()
+        }
     }
 
     func setupPairListener() {

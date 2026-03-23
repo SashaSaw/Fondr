@@ -1,5 +1,4 @@
 import SwiftUI
-import FirebaseCore
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -7,9 +6,19 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        FirebaseApp.configure()
         UNUserNotificationCenter.current().delegate = self
         return true
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // Send APNs device token to our backend
+        // AuthService will be available since it's initialized in AppState
+        // We defer this to when the app state is set up
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        Task {
+            let body = APNsTokenRequest(token: tokenString)
+            try? await APIClient.shared.post("/users/me/apns-token", body: body) as SuccessResponse
+        }
     }
 
     // MARK: - UNUserNotificationCenterDelegate
@@ -19,7 +28,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        // Show banner even when app is in foreground
         completionHandler([.banner, .sound])
     }
 
@@ -54,6 +62,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             NotificationCenter.default.post(name: .switchToTab, object: tab)
         }
     }
+}
+
+private struct APNsTokenRequest: Encodable {
+    let token: String
 }
 
 @main

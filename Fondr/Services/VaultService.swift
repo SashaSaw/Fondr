@@ -1,6 +1,4 @@
 import Foundation
-import FirebaseAuth
-import FirebaseFirestore
 
 @Observable
 final class VaultService {
@@ -8,13 +6,7 @@ final class VaultService {
     var errorMessage: String?
     var isLoading = false
 
-    private var listener: ListenerRegistration?
     private var currentPairId: String?
-    private var db: Firestore { Firestore.firestore() }
-
-    deinit {
-        listener?.remove()
-    }
 
     // MARK: - Computed
 
@@ -32,22 +24,31 @@ final class VaultService {
         stopListening()
         currentPairId = pairId
 
-        listener = db.collection(Constants.Firestore.pairsCollection)
-            .document(pairId)
-            .collection(Constants.Vault.collection)
-            .order(by: "createdAt", descending: true)
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let snapshot else {
-                    self?.errorMessage = error?.localizedDescription
-                    return
-                }
-                self?.facts = snapshot.documents.compactMap { try? $0.data(as: VaultFact.self) }
+        // Initial load via REST
+        Task {
+            do {
+                let loaded: [VaultFact] = try await APIClient.shared.get("/pairs/\(pairId)/vault")
+                await MainActor.run { self.facts = loaded }
+            } catch {
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
+        }
+
+        // Real-time updates via WebSocket
+        WebSocketManager.shared.on("vault:created") { [weak self] (fact: VaultFact) in
+            self?.facts.insert(fact, at: 0)
+        }
+        WebSocketManager.shared.on("vault:updated") { [weak self] (fact: VaultFact) in
+            if let i = self?.facts.firstIndex(where: { $0.id == fact.id }) {
+                self?.facts[i] = fact
+            }
+        }
+        WebSocketManager.shared.on("vault:deleted") { [weak self] (payload: DeletePayload) in
+            self?.facts.removeAll { $0.id == payload.id }
+        }
     }
 
     func stopListening() {
-        listener?.remove()
-        listener = nil
         facts = []
         currentPairId = nil
     }
@@ -55,29 +56,14 @@ final class VaultService {
     // MARK: - CRUD
 
     func addFact(category: FactCategory, label: String, value: String) {
-        guard let pairId = currentPairId,
-              let uid = Auth.auth().currentUser?.uid else { return }
-
-        let now = Date()
-        let fact = VaultFact(
-            category: category,
-            label: label,
-            value: value,
-            addedBy: uid,
-            createdAt: now,
-            updatedAt: now
-        )
+        guard let pairId = currentPairId else { return }
 
         Task {
             do {
-                let colRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Vault.collection)
-                try colRef.addDocument(from: fact)
+                let body = CreateVaultFactBody(category: category.rawValue, label: label, value: value)
+                let _: VaultFact = try await APIClient.shared.post("/pairs/\(pairId)/vault", body: body)
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -87,19 +73,10 @@ final class VaultService {
 
         Task {
             do {
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Vault.collection)
-                    .document(factId)
-                    .updateData([
-                        "label": label,
-                        "value": value,
-                        "updatedAt": Date()
-                    ])
+                let body = UpdateVaultFactBody(label: label, value: value)
+                let _: VaultFact = try await APIClient.shared.patch("/pairs/\(pairId)/vault/\(factId)", body: body)
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -109,15 +86,9 @@ final class VaultService {
 
         Task {
             do {
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Vault.collection)
-                    .document(factId)
-                    .delete()
+                try await APIClient.shared.delete("/pairs/\(pairId)/vault/\(factId)")
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -131,4 +102,25 @@ final class VaultService {
             $0.value.lowercased().contains(lowered)
         }
     }
+}
+
+// MARK: - Request DTOs
+
+private struct CreateVaultFactBody: Encodable {
+    let category: String
+    let label: String
+    let value: String
+}
+
+private struct UpdateVaultFactBody: Encodable {
+    let label: String
+    let value: String
+}
+
+struct DeletePayload: Decodable {
+    let id: String
+}
+
+struct ItemStatusUpdate: Encodable {
+    let status: String
 }

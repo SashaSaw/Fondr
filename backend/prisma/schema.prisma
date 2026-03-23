@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String?   @unique
+  displayName          String    @map("display_name")
+  passwordHash         String?   @map("password_hash")
+  appleSub             String?   @unique @map("apple_sub")
+  partnerName          String?   @map("partner_name")
+  timezone             String?
+  pairId               String?   @map("pair_id") @db.Uuid
+  partnerId            String?   @unique @map("partner_id") @db.Uuid
+  onboardingCompleted  Boolean   @default(false) @map("onboarding_completed")
+  profileImageUrl      String?   @map("profile_image_url")
+  apnsToken            String?   @map("apns_token")
+  refreshToken         String?   @map("refresh_token")
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  pair                 Pair?     @relation("PairMembers", fields: [pairId], references: [id], onDelete: SetNull)
+  partner              User?     @relation("Partners", fields: [partnerId], references: [id], onDelete: SetNull)
+  partnerOf            User?     @relation("Partners")
+
+  pairsAsUserA         Pair[]    @relation("UserA")
+  pairsAsUserB         Pair[]    @relation("UserB")
+
+  vaultFacts           VaultFact[]
+  listItems            ListItem[]
+  sharedLists          SharedList[]
+  swipeSessions        SwipeSession[]
+  availabilitySlots    AvailabilitySlot[]
+  calendarEvents       CalendarEvent[]
+  significantDates     SignificantDate[]
+
+  @@map("users")
+}
+
+model Pair {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userAId     String    @map("user_a") @db.Uuid
+  userBId     String?   @map("user_b") @db.Uuid
+  inviteCode  String    @unique @map("invite_code")
+  status      String    @default("pending")
+  anniversary DateTime? @db.Date
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  userA       User      @relation("UserA", fields: [userAId], references: [id])
+  userB       User?     @relation("UserB", fields: [userBId], references: [id])
+  members     User[]    @relation("PairMembers")
+
+  vaultFacts        VaultFact[]
+  sharedLists       SharedList[]
+  listItems         ListItem[]
+  swipeSessions     SwipeSession[]
+  availabilitySlots AvailabilitySlot[]
+  calendarEvents    CalendarEvent[]
+  significantDates  SignificantDate[]
+
+  @@index([inviteCode], map: "idx_pairs_invite_code")
+  @@map("pairs")
+}
+
+model VaultFact {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pairId    String   @map("pair_id") @db.Uuid
+  category  String
+  label     String
+  value     String
+  addedById String   @map("added_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  pair    Pair @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  addedBy User @relation(fields: [addedById], references: [id])
+
+  @@index([pairId], map: "idx_vault_facts_pair")
+  @@map("vault_facts")
+}
+
+model SharedList {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pairId    String   @map("pair_id") @db.Uuid
+  title     String
+  emoji     String
+  subtitle  String?
+  createdById String @map("created_by") @db.Uuid
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  pair      Pair     @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  createdBy User     @relation(fields: [createdById], references: [id])
+  items     ListItem[]
+
+  @@map("shared_lists")
+}
+
+model ListItem {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listId          String   @map("list_id") @db.Uuid
+  pairId          String   @map("pair_id") @db.Uuid
+  title           String
+  description     String?
+  imageUrl        String?  @map("image_url")
+  addedById       String   @map("added_by") @db.Uuid
+  status          String   @default("suggested")
+  completionNote  String?  @map("completion_note")
+  metadataTmdbId  Int?     @map("metadata_tmdb_id")
+  metadataYear    String?  @map("metadata_year")
+  metadataGenre   String?  @map("metadata_genre")
+  metadataRating  Float?   @map("metadata_rating")
+  metadataRuntime String?  @map("metadata_runtime")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  list    SharedList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  pair    Pair       @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  addedBy User       @relation(fields: [addedById], references: [id])
+
+  @@index([listId], map: "idx_list_items_list")
+  @@index([pairId], map: "idx_list_items_pair")
+  @@map("list_items")
+}
+
+model SwipeSession {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pairId        String    @map("pair_id") @db.Uuid
+  listId        String    @map("list_id") @db.Uuid
+  itemIds       String[]  @map("item_ids")
+  swipesA       Json      @default("{}") @map("swipes_a")
+  swipesB       Json      @default("{}") @map("swipes_b")
+  matches       String[]  @default([])
+  status        String    @default("active")
+  startedById   String    @map("started_by") @db.Uuid
+  chosenItemId  String?   @map("chosen_item_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at")
+  completedAt   DateTime? @map("completed_at")
+
+  pair      Pair @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  startedBy User @relation(fields: [startedById], references: [id])
+
+  @@index([pairId, status], map: "idx_swipe_sessions_pair_status")
+  @@map("swipe_sessions")
+}
+
+model AvailabilitySlot {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pairId    String   @map("pair_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  date      DateTime @db.Date
+  startTime String?  @map("start_time")
+  endTime   String?  @map("end_time")
+  label     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  pair Pair @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([pairId, userId, date])
+  @@index([pairId, date], map: "idx_availability_pair_date")
+  @@map("availability_slots")
+}
+
+model CalendarEvent {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pairId        String    @map("pair_id") @db.Uuid
+  title         String
+  description   String?
+  startDate     DateTime  @map("start_date") @db.Date
+  endDate       DateTime  @map("end_date") @db.Date
+  startTime     String?   @map("start_time")
+  endTime       String?   @map("end_time")
+  createdById   String    @map("created_by") @db.Uuid
+  status        String    @default("pending")
+  declineReason String?   @map("decline_reason")
+  respondedAt   DateTime? @map("responded_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  pair      Pair @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@index([pairId], map: "idx_calendar_events_pair")
+  @@map("calendar_events")
+}
+
+model SignificantDate {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pairId    String   @map("pair_id") @db.Uuid
+  title     String
+  date      DateTime @db.Date
+  emoji     String?
+  recurring Boolean  @default(false)
+  addedById String   @map("added_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  pair    Pair @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  addedBy User @relation(fields: [addedById], references: [id])
+
+  @@index([pairId], map: "idx_significant_dates_pair")
+  @@map("significant_dates")
+}

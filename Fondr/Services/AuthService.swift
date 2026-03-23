@@ -1,50 +1,40 @@
 import Foundation
-import FirebaseAuth
-import FirebaseFirestore
 import AuthenticationServices
 import CryptoKit
 
+struct AuthResponse: Decodable {
+    let accessToken: String
+    let refreshToken: String
+    let user: AppUser
+}
+
 @Observable
 final class AuthService {
-    var currentUser: FirebaseAuth.User?
     var appUser: AppUser?
     var errorMessage: String?
     var isLoading = false
 
-    private var authStateHandle: AuthStateDidChangeListenerHandle?
-    private var userListener: ListenerRegistration?
-    private var currentNonce: String?
-    private var db: Firestore { Firestore.firestore() }
-
-    func start() {
-
-        authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
-
-            self?.currentUser = user
-            if let uid = user?.uid {
-                self?.ensureUserDocExists(uid: uid, email: user?.email ?? "")
-                self?.listenToUserDoc(uid: uid)
-            } else {
-                self?.userListener?.remove()
-                self?.appUser = nil
-            }
-        }
+    var isAuthenticated: Bool {
+        TokenStore.shared.isLoggedIn
     }
 
-    deinit {
-        if let handle = authStateHandle {
-            Auth.auth().removeStateDidChangeListener(handle)
+    var currentUserId: String? {
+        TokenStore.shared.userId
+    }
+
+    func start() {
+        // Restore session from keychain
+        if TokenStore.shared.isLoggedIn {
+            Task {
+                await loadCurrentUser()
+            }
         }
-        userListener?.remove()
     }
 
     // MARK: - Sign In with Apple
 
     func handleSignInWithAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
-        let nonce = randomNonceString()
-        currentNonce = nonce
         request.requestedScopes = [.fullName, .email]
-        request.nonce = sha256(nonce)
     }
 
     func handleSignInWithAppleCompletion(_ result: Result<ASAuthorization, Error>) {
@@ -52,43 +42,25 @@ final class AuthService {
         case .success(let authorization):
             guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
                   let appleIDToken = appleIDCredential.identityToken,
-                  let idTokenString = String(data: appleIDToken, encoding: .utf8),
-                  let nonce = currentNonce else {
+                  let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
                 errorMessage = "Unable to process Apple Sign In."
                 return
             }
 
-            let credential = OAuthProvider.appleCredential(
-                withIDToken: idTokenString,
-                rawNonce: nonce,
-                fullName: appleIDCredential.fullName
-            )
+            let fullName = [
+                appleIDCredential.fullName?.givenName,
+                appleIDCredential.fullName?.familyName
+            ].compactMap { $0 }.joined(separator: " ")
 
             isLoading = true
             Task {
                 do {
-                    let authResult = try await Auth.auth().signIn(with: credential)
-                    let uid = authResult.user.uid
-
-                    // Create user doc if first sign-in
-                    let docRef = db.collection(Constants.Firestore.usersCollection).document(uid)
-                    let snapshot = try await docRef.getDocument()
-                    if !snapshot.exists {
-                        let displayName = [
-                            appleIDCredential.fullName?.givenName,
-                            appleIDCredential.fullName?.familyName
-                        ].compactMap { $0 }.joined(separator: " ")
-
-                        let newUser = AppUser(
-                            displayName: displayName.isEmpty ? "User" : displayName,
-                            email: appleIDCredential.email ?? authResult.user.email ?? ""
-                        )
-                        try docRef.setData(from: newUser)
-                    }
-
-                    await MainActor.run {
-                        self.isLoading = false
-                    }
+                    let body = AppleSignInRequest(
+                        identityToken: idTokenString,
+                        fullName: fullName.isEmpty ? nil : fullName
+                    )
+                    let response: AuthResponse = try await APIClient.shared.post("/auth/apple", body: body)
+                    await handleAuthResponse(response)
                 } catch {
                     await MainActor.run {
                         self.errorMessage = error.localizedDescription
@@ -109,8 +81,9 @@ final class AuthService {
         errorMessage = nil
         Task {
             do {
-                try await Auth.auth().signIn(withEmail: email, password: password)
-                await MainActor.run { self.isLoading = false }
+                let body = LoginRequest(email: email, password: password)
+                let response: AuthResponse = try await APIClient.shared.post("/auth/login", body: body)
+                await handleAuthResponse(response)
             } catch {
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
@@ -125,15 +98,9 @@ final class AuthService {
         errorMessage = nil
         Task {
             do {
-                let result = try await Auth.auth().createUser(withEmail: email, password: password)
-                let uid = result.user.uid
-
-                let newUser = AppUser(displayName: displayName, email: email)
-                try db.collection(Constants.Firestore.usersCollection)
-                    .document(uid)
-                    .setData(from: newUser)
-
-                await MainActor.run { self.isLoading = false }
+                let body = RegisterRequest(email: email, password: password, displayName: displayName)
+                let response: AuthResponse = try await APIClient.shared.post("/auth/register", body: body)
+                await handleAuthResponse(response)
             } catch {
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
@@ -144,56 +111,102 @@ final class AuthService {
     }
 
     func signOut() {
-        do {
-            try Auth.auth().signOut()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        TokenStore.shared.clear()
+        WebSocketManager.shared.disconnect()
+        appUser = nil
     }
 
-    // MARK: - User Doc
+    // MARK: - User Profile
 
     func updateUserDoc(_ updates: [String: Any]) {
-        guard let uid = currentUser?.uid else { return }
-        db.collection(Constants.Firestore.usersCollection).document(uid).setData(updates, merge: true)
-    }
-
-    private func ensureUserDocExists(uid: String, email: String) {
-        let docRef = db.collection(Constants.Firestore.usersCollection).document(uid)
+        // Convert to Encodable for the API
         Task {
-            let snapshot = try? await docRef.getDocument()
-            if snapshot?.exists != true {
-                let newUser = AppUser(
-                    displayName: Auth.auth().currentUser?.displayName ?? "User",
-                    email: email
-                )
-                try? docRef.setData(from: newUser)
+            do {
+                let body = UserUpdateBody(updates)
+                let updated: AppUser = try await APIClient.shared.patch("/users/me", body: body)
+                await MainActor.run {
+                    self.appUser = updated
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = error.localizedDescription
+                }
             }
         }
     }
 
-    private func listenToUserDoc(uid: String) {
-        userListener?.remove()
-        userListener = db.collection(Constants.Firestore.usersCollection)
-            .document(uid)
-            .addSnapshotListener { [weak self] snapshot, _ in
-                guard let snapshot, snapshot.exists else { return }
-                self?.appUser = try? snapshot.data(as: AppUser.self)
+    func loadCurrentUser() async {
+        do {
+            let user: AppUser = try await APIClient.shared.get("/users/me")
+            await MainActor.run {
+                self.appUser = user
             }
+        } catch {
+            // Token might be invalid
+            if case APIError.unauthorized = error {
+                await MainActor.run {
+                    TokenStore.shared.clear()
+                    self.appUser = nil
+                }
+            }
+        }
     }
 
-    // MARK: - Nonce Helpers
-
-    private func randomNonceString(length: Int = 32) -> String {
-        var randomBytes = [UInt8](repeating: 0, count: length)
-        _ = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
-        let charset = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
-        return String(randomBytes.map { charset[Int($0) % charset.count] })
+    func registerAPNsToken(_ token: Data) {
+        let tokenString = token.map { String(format: "%02.2hhx", $0) }.joined()
+        Task {
+            let body = APNsTokenBody(token: tokenString)
+            try? await APIClient.shared.post("/users/me/apns-token", body: body) as SuccessResponse
+        }
     }
 
-    private func sha256(_ input: String) -> String {
-        let data = Data(input.utf8)
-        let hash = SHA256.hash(data: data)
-        return hash.compactMap { String(format: "%02x", $0) }.joined()
+    // MARK: - Private
+
+    @MainActor
+    private func handleAuthResponse(_ response: AuthResponse) {
+        TokenStore.shared.accessToken = response.accessToken
+        TokenStore.shared.refreshToken = response.refreshToken
+        TokenStore.shared.userId = response.user.id
+        appUser = response.user
+        isLoading = false
+
+        // Connect WebSocket after auth
+        WebSocketManager.shared.connect()
+    }
+}
+
+// MARK: - Request DTOs
+
+private struct AppleSignInRequest: Encodable {
+    let identityToken: String
+    let fullName: String?
+}
+
+private struct LoginRequest: Encodable {
+    let email: String
+    let password: String
+}
+
+private struct RegisterRequest: Encodable {
+    let email: String
+    let password: String
+    let displayName: String
+}
+
+private struct APNsTokenBody: Encodable {
+    let token: String
+}
+
+struct UserUpdateBody: Encodable {
+    let displayName: String?
+    let timezone: String?
+    let partnerName: String?
+    let onboardingCompleted: Bool?
+
+    init(_ dict: [String: Any]) {
+        self.displayName = dict["displayName"] as? String
+        self.timezone = dict["timezone"] as? String
+        self.partnerName = dict["partnerName"] as? String
+        self.onboardingCompleted = dict["onboardingCompleted"] as? Bool
     }
 }

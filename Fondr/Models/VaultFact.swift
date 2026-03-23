@@ -1,14 +1,19 @@
 import Foundation
-import FirebaseFirestore
 
 struct VaultFact: Identifiable, Codable, Sendable {
-    @DocumentID var id: String?
+    var id: String
     var category: FactCategory
     var label: String
     var value: String
     var addedBy: String
     var createdAt: Date
     var updatedAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id, category, label, value
+        case addedBy = "addedById"
+        case createdAt, updatedAt
+    }
 }
 
 enum FactCategory: String, Codable, CaseIterable, Sendable {

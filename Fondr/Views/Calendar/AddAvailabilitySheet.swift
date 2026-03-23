@@ -74,8 +74,33 @@ struct AddAvailabilitySheet: View {
         }
     }
 
+    private var eventDateStrings: [String] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        var dates: [String] = []
+        var current = startDate
+        let calendar = Foundation.Calendar.current
+        while current <= endDate {
+            dates.append(formatter.string(from: current))
+            guard let next = calendar.date(byAdding: .day, value: 1, to: current) else { break }
+            current = next
+        }
+        return dates
+    }
+
+    private var partnerBusyDates: [String] {
+        let partnerSlots = calendarService.partnerSlots
+        return eventDateStrings.filter { dateStr in
+            partnerSlots.contains { $0.date == dateStr }
+        }
+    }
+
+    private var hasPartnerBusyConflict: Bool {
+        !partnerBusyDates.isEmpty
+    }
+
     private var canSave: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty
+        !title.trimmingCharacters(in: .whitespaces).isEmpty && !hasPartnerBusyConflict
     }
 
     private var previewText: String {
@@ -123,6 +148,14 @@ struct AddAvailabilitySheet: View {
                     }
                 }
 
+                if hasPartnerBusyConflict {
+                    Section {
+                        Label("Your partner is busy on: \(partnerBusyDates.joined(separator: ", "))", systemImage: "exclamationmark.triangle.fill")
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(.red)
+                    }
+                }
+
                 Section {
                     Text(previewText)
                         .font(.system(.caption, design: .rounded))
@@ -163,6 +196,8 @@ struct AddAvailabilitySheet: View {
         if let eventId = editingEventId {
             calendarService.updateEvent(eventId: eventId, title: trimmedTitle, description: desc, startDate: startStr, endDate: endStr, startTime: sTime, endTime: eTime)
         } else {
+            // Remove user's own busy slots for dates in the event range
+            calendarService.removeMySlots(for: eventDateStrings)
             calendarService.addEvent(title: trimmedTitle, description: desc, startDate: startStr, endDate: endStr, startTime: sTime, endTime: eTime)
         }
 

@@ -1,6 +1,4 @@
 import Foundation
-import FirebaseAuth
-import FirebaseFirestore
 
 @Observable
 final class ListService {
@@ -9,15 +7,7 @@ final class ListService {
     var errorMessage: String?
     var isLoading = false
 
-    private var listener: ListenerRegistration?
-    private var listsListener: ListenerRegistration?
     private var currentPairId: String?
-    private var db: Firestore { Firestore.firestore() }
-
-    deinit {
-        listener?.remove()
-        listsListener?.remove()
-    }
 
     // MARK: - Computed
 
@@ -50,45 +40,48 @@ final class ListService {
         stopListening()
         currentPairId = pairId
 
-        // Items listener
-        listener = db.collection(Constants.Firestore.pairsCollection)
-            .document(pairId)
-            .collection(Constants.Lists.collection)
-            .order(by: "createdAt", descending: true)
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let snapshot else {
-                    self?.errorMessage = error?.localizedDescription
-                    return
+        // Initial load
+        Task {
+            do {
+                async let loadedLists: [SharedList] = APIClient.shared.get("/pairs/\(pairId)/lists")
+                async let loadedItems: [ListItem] = APIClient.shared.get("/pairs/\(pairId)/items")
+                let (l, i) = try await (loadedLists, loadedItems)
+                await MainActor.run {
+                    self.lists = l
+                    self.items = i
                 }
-                self?.items = snapshot.documents.compactMap { try? $0.data(as: ListItem.self) }
+            } catch {
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
+        }
 
-        // Lists-meta listener
-        listsListener = db.collection(Constants.Firestore.pairsCollection)
-            .document(pairId)
-            .collection(Constants.Lists.metaCollection)
-            .order(by: "sortOrder")
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let self, let snapshot else { return }
-                let decoded = snapshot.documents.compactMap { try? $0.data(as: SharedList.self) }
-                self.lists = decoded
-
-                // First snapshot: seed or migrate if needed
-                if decoded.isEmpty {
-                    if self.items.isEmpty {
-                        self.seedDefaultLists()
-                    } else {
-                        self.migrateFromCategories()
-                    }
-                }
+        // WebSocket events
+        WebSocketManager.shared.on("list:created") { [weak self] (list: SharedList) in
+            self?.lists.append(list)
+        }
+        WebSocketManager.shared.on("list:updated") { [weak self] (list: SharedList) in
+            if let i = self?.lists.firstIndex(where: { $0.id == list.id }) {
+                self?.lists[i] = list
             }
+        }
+        WebSocketManager.shared.on("list:deleted") { [weak self] (payload: DeletePayload) in
+            self?.lists.removeAll { $0.id == payload.id }
+            self?.items.removeAll { $0.listId == payload.id }
+        }
+        WebSocketManager.shared.on("item:created") { [weak self] (item: ListItem) in
+            self?.items.insert(item, at: 0)
+        }
+        WebSocketManager.shared.on("item:updated") { [weak self] (item: ListItem) in
+            if let i = self?.items.firstIndex(where: { $0.id == item.id }) {
+                self?.items[i] = item
+            }
+        }
+        WebSocketManager.shared.on("item:deleted") { [weak self] (payload: DeletePayload) in
+            self?.items.removeAll { $0.id == payload.id }
+        }
     }
 
     func stopListening() {
-        listener?.remove()
-        listener = nil
-        listsListener?.remove()
-        listsListener = nil
         items = []
         lists = []
         currentPairId = nil
@@ -97,28 +90,14 @@ final class ListService {
     // MARK: - SharedList CRUD
 
     func createList(title: String, emoji: String, subtitle: String?) {
-        guard let pairId = currentPairId,
-              let uid = Auth.auth().currentUser?.uid else { return }
-
-        let list = SharedList(
-            title: title,
-            emoji: emoji,
-            subtitle: subtitle,
-            createdBy: uid,
-            createdAt: Date(),
-            sortOrder: lists.count
-        )
+        guard let pairId = currentPairId else { return }
 
         Task {
             do {
-                let colRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.metaCollection)
-                try colRef.addDocument(from: list)
+                let body = CreateListBody(title: title, emoji: emoji, subtitle: subtitle)
+                let _: SharedList = try await APIClient.shared.post("/pairs/\(pairId)/lists", body: body)
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -128,19 +107,10 @@ final class ListService {
 
         Task {
             do {
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.metaCollection)
-                    .document(listId)
-                    .updateData([
-                        "title": title,
-                        "emoji": emoji,
-                        "subtitle": subtitle as Any
-                    ])
+                let body = UpdateListBody(title: title, emoji: emoji, subtitle: subtitle)
+                let _: SharedList = try await APIClient.shared.patch("/pairs/\(pairId)/lists/\(listId)", body: body)
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -150,27 +120,9 @@ final class ListService {
 
         Task {
             do {
-                // Delete the list meta doc
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.metaCollection)
-                    .document(listId)
-                    .delete()
-
-                // Batch-delete all items belonging to this list
-                let itemsRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.collection)
-                let snapshot = try await itemsRef.whereField("listId", isEqualTo: listId).getDocuments()
-                let batch = db.batch()
-                for doc in snapshot.documents {
-                    batch.deleteDocument(doc.reference)
-                }
-                try await batch.commit()
+                try await APIClient.shared.delete("/pairs/\(pairId)/lists/\(listId)")
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -178,32 +130,24 @@ final class ListService {
     // MARK: - Item CRUD
 
     func addItem(listId: String, title: String, description: String?, imageUrl: String?, metadata: MovieMetadata?) {
-        guard let pairId = currentPairId,
-              let uid = Auth.auth().currentUser?.uid else { return }
-
-        let now = Date()
-        let item = ListItem(
-            title: title,
-            description: description,
-            imageUrl: imageUrl,
-            listId: listId,
-            addedBy: uid,
-            status: .suggested,
-            metadata: metadata,
-            createdAt: now,
-            updatedAt: now
-        )
+        guard let pairId = currentPairId else { return }
 
         Task {
             do {
-                let colRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.collection)
-                try colRef.addDocument(from: item)
+                let body = CreateItemBody(
+                    listId: listId,
+                    title: title,
+                    description: description,
+                    imageUrl: imageUrl,
+                    metadataTmdbId: metadata?.tmdbId,
+                    metadataYear: metadata?.year,
+                    metadataGenre: metadata?.genre,
+                    metadataRating: metadata?.rating,
+                    metadataRuntime: metadata?.runtime
+                )
+                let _: ListItem = try await APIClient.shared.post("/pairs/\(pairId)/items", body: body)
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -213,19 +157,10 @@ final class ListService {
 
         Task {
             do {
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.collection)
-                    .document(itemId)
-                    .updateData([
-                        "title": title,
-                        "description": description as Any,
-                        "updatedAt": Date()
-                    ])
+                let body = UpdateItemBody(title: title, description: description)
+                let _: ListItem = try await APIClient.shared.patch("/pairs/\(pairId)/items/\(itemId)", body: body)
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -235,22 +170,10 @@ final class ListService {
 
         Task {
             do {
-                var data: [String: Any] = [
-                    "status": ItemStatus.done.rawValue,
-                    "updatedAt": Date()
-                ]
-                if let note, !note.isEmpty {
-                    data["completionNote"] = note
-                }
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.collection)
-                    .document(itemId)
-                    .updateData(data)
+                let body = UpdateItemBody(status: ItemStatus.done.rawValue, completionNote: note)
+                let _: ListItem = try await APIClient.shared.patch("/pairs/\(pairId)/items/\(itemId)", body: body)
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -260,94 +183,43 @@ final class ListService {
 
         Task {
             do {
-                try await db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.collection)
-                    .document(itemId)
-                    .delete()
+                try await APIClient.shared.delete("/pairs/\(pairId)/items/\(itemId)")
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
+}
 
-    // MARK: - Seeding & Migration
+// MARK: - Request DTOs
 
-    private func seedDefaultLists() {
-        guard let pairId = currentPairId,
-              let uid = Auth.auth().currentUser?.uid else { return }
+private struct CreateListBody: Encodable {
+    let title: String
+    let emoji: String
+    let subtitle: String?
+}
 
-        let now = Date()
-        let defaults: [(String, String, String?, Int)] = [
-            ("Date Ideas", "💡", "Things to do together", 0),
-            ("Watch Together", "🍿", "Movies, shows & more", 1)
-        ]
+private struct UpdateListBody: Encodable {
+    let title: String?
+    let emoji: String?
+    let subtitle: String?
+}
 
-        Task {
-            do {
-                let colRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.metaCollection)
-                for (title, emoji, subtitle, order) in defaults {
-                    let list = SharedList(title: title, emoji: emoji, subtitle: subtitle, createdBy: uid, createdAt: now, sortOrder: order)
-                    try colRef.addDocument(from: list)
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
+private struct CreateItemBody: Encodable {
+    let listId: String
+    let title: String
+    let description: String?
+    let imageUrl: String?
+    let metadataTmdbId: Int?
+    let metadataYear: String?
+    let metadataGenre: String?
+    let metadataRating: Double?
+    let metadataRuntime: String?
+}
 
-    private func migrateFromCategories() {
-        guard let pairId = currentPairId,
-              let uid = Auth.auth().currentUser?.uid else { return }
-
-        let categoryMap: [String: (String, String)] = [
-            "date-ideas": ("💡", "Date Ideas"),
-            "watch-together": ("🍿", "Watch Together")
-        ]
-
-        // Collect unique categories from existing items
-        let uniqueCategories = Set(items.map(\.listId))
-        let now = Date()
-
-        Task {
-            do {
-                let metaRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.metaCollection)
-                let itemsRef = db.collection(Constants.Firestore.pairsCollection)
-                    .document(pairId)
-                    .collection(Constants.Lists.collection)
-
-                var categoryToDocId: [String: String] = [:]
-
-                // Create SharedList docs for each category
-                for (index, category) in uniqueCategories.sorted().enumerated() {
-                    let (emoji, title) = categoryMap[category] ?? ("📋", category.replacingOccurrences(of: "-", with: " ").capitalized)
-                    let list = SharedList(title: title, emoji: emoji, subtitle: nil, createdBy: uid, createdAt: now, sortOrder: index)
-                    let docRef = try metaRef.addDocument(from: list)
-                    categoryToDocId[category] = docRef.documentID
-                }
-
-                // Batch-update items to use new listId
-                let batch = db.batch()
-                for item in self.items {
-                    guard let itemId = item.id,
-                          let newListId = categoryToDocId[item.listId] else { continue }
-                    let docRef = itemsRef.document(itemId)
-                    batch.updateData(["listId": newListId], forDocument: docRef)
-                }
-                try await batch.commit()
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
+private struct UpdateItemBody: Encodable {
+    var title: String?
+    var description: String?
+    var status: String?
+    var completionNote: String?
 }

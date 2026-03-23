@@ -1,8 +1,7 @@
 import Foundation
-import FirebaseFirestore
 
 struct AppUser: Codable, Identifiable, Sendable {
-    @DocumentID var id: String?
+    var id: String
     var displayName: String
     var email: String?
     var partnerName: String?
@@ -13,8 +12,14 @@ struct AppUser: Codable, Identifiable, Sendable {
     var profileImageUrl: String?
     var createdAt: Date?
 
+    enum CodingKeys: String, CodingKey {
+        case id, displayName, email, partnerName, timezone, pairId
+        case partnerUid = "partnerId"
+        case onboardingCompleted, profileImageUrl, createdAt
+    }
+
     init(
-        id: String? = nil,
+        id: String = "",
         displayName: String,
         email: String? = nil,
         partnerName: String? = nil,

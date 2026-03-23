@@ -1,5 +1,5 @@
 import SwiftUI
-import FirebaseAuth
+import Foundation
 
 struct DayDetailView: View {
     let date: Date
@@ -33,18 +33,22 @@ struct DayDetailView: View {
     }
 
     private var mySlot: AvailabilitySlot? {
-        guard let uid = Auth.auth().currentUser?.uid else { return nil }
+        guard let uid = TokenStore.shared.userId else { return nil }
         return calendarService.slotForDate(userId: uid, date: date)
     }
 
     private var partnerSlot: AvailabilitySlot? {
-        guard let uid = Auth.auth().currentUser?.uid else { return nil }
+        guard let uid = TokenStore.shared.userId else { return nil }
         let dateStr = dateString(from: date)
         return calendarService.slots.first { $0.userId != uid && $0.date == dateStr }
     }
 
     private var dayEvents: [CalendarEvent] {
         calendarService.eventsForDate(date)
+    }
+
+    private var hasEvents: Bool {
+        !dayEvents.isEmpty
     }
 
     private var overlaps: [OverlapBlock] {
@@ -85,11 +89,18 @@ struct DayDetailView: View {
     private var yourAvailabilitySection: some View {
         Section("Your Availability") {
             Toggle("Busy this day", isOn: $isBusy)
+                .disabled(hasEvents)
                 .onChange(of: isBusy) { _, newValue in
                     if newValue != (mySlot != nil) {
                         calendarService.toggleAvailability(for: date)
                     }
                 }
+
+            if hasEvents {
+                Text("Can't mark as busy — this day has events")
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
 
             if isBusy {
                 Toggle("Set time range", isOn: $useTimeRange)
@@ -178,7 +189,7 @@ struct DayDetailView: View {
 
     // MARK: - Events
 
-    private var currentUid: String? { Auth.auth().currentUser?.uid }
+    private var currentUid: String? { TokenStore.shared.userId }
 
     private var eventsSection: some View {
         Section("Events") {
@@ -227,11 +238,9 @@ struct DayDetailView: View {
                                         .font(.system(.caption, design: .rounded))
                                         .textFieldStyle(.roundedBorder)
                                     Button("Send") {
-                                        if let id = event.id {
-                                            calendarService.respondToEvent(eventId: id, accepted: false, reason: declineReasonText.isEmpty ? nil : declineReasonText)
-                                            declineReasonFor = nil
-                                            declineReasonText = ""
-                                        }
+                                        calendarService.respondToEvent(eventId: event.id, accepted: false, reason: declineReasonText.isEmpty ? nil : declineReasonText)
+                                        declineReasonFor = nil
+                                        declineReasonText = ""
                                     }
                                     .font(.system(.caption, design: .rounded, weight: .medium))
                                     Button("Cancel") {
@@ -243,9 +252,7 @@ struct DayDetailView: View {
                             } else {
                                 HStack(spacing: 12) {
                                     Button {
-                                        if let id = event.id {
-                                            calendarService.respondToEvent(eventId: id, accepted: true, reason: nil)
-                                        }
+                                        calendarService.respondToEvent(eventId: event.id, accepted: true, reason: nil)
                                     } label: {
                                         Label("Accept", systemImage: "checkmark")
                                             .font(.system(.caption, design: .rounded, weight: .medium))
@@ -279,9 +286,7 @@ struct DayDetailView: View {
                     .onTapGesture { editingEvent = event }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
-                            if let id = event.id {
-                                calendarService.deleteEvent(eventId: id)
-                            }
+                            calendarService.deleteEvent(eventId: event.id)
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }

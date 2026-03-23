@@ -6,11 +6,6 @@ options:
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
 
-packages:
-  Firebase:
-    url: https://github.com/firebase/firebase-ios-sdk
-    majorVersion: "11.0.0"
-
 targets:
   Fondr:
     type: application
@@ -36,10 +31,4 @@ targets:
         com.apple.developer.applesignin:
           - Default
     dependencies:
-      - package: Firebase
-        product: FirebaseAuth
-      - package: Firebase
-        product: FirebaseFirestore
-      - package: Firebase
-        product: FirebaseMessaging
       - sdk: AuthenticationServices.framework

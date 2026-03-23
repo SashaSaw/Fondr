@@ -1,5 +1,5 @@
 import SwiftUI
-import FirebaseFirestore
+import Foundation
 
 struct OnboardingView: View {
     @Environment(AuthService.self) private var authService
@@ -123,11 +123,6 @@ struct OnboardingView: View {
         guard !isSaving else { return }
         isSaving = true
 
-        guard let uid = authService.currentUser?.uid else {
-            isSaving = false
-            return
-        }
-
         let updates: [String: Any] = [
             "displayName": displayName.trimmingCharacters(in: .whitespaces),
             "partnerName": partnerName.trimmingCharacters(in: .whitespaces),
@@ -137,10 +132,8 @@ struct OnboardingView: View {
 
         Task {
             do {
-                try await Firestore.firestore()
-                    .collection(Constants.Firestore.usersCollection)
-                    .document(uid)
-                    .setData(updates, merge: true)
+                let body = UserUpdateBody(updates)
+                let _: AppUser = try await APIClient.shared.patch("/users/me", body: body)
             } catch {
                 await MainActor.run { isSaving = false }
             }

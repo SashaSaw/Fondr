@@ -1,8 +1,7 @@
 import Foundation
-import FirebaseFirestore
 
 struct Pair: Codable, Identifiable, Sendable {
-    @DocumentID var id: String?
+    var id: String
     var userA: String
     var userB: String?
     var inviteCode: String
@@ -15,11 +14,18 @@ struct Pair: Codable, Identifiable, Sendable {
         case active
     }
 
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userA = "userAId"
+        case userB = "userBId"
+        case inviteCode, status, anniversary, createdAt
+    }
+
     init(
-        id: String? = nil,
+        id: String = "",
         userA: String,
         userB: String? = nil,
-        inviteCode: String,
+        inviteCode: String = "",
         status: Status = .pending,
         anniversary: Date? = nil,
         createdAt: Date = Date()

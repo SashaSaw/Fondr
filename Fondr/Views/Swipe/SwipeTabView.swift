@@ -103,7 +103,7 @@ struct SwipeTabView: View {
     // MARK: - List Launch Card
 
     private func listLaunchCard(list: SharedList) -> some View {
-        let listId = list.id ?? ""
+        let listId = list.id
         let suggestedCount = listService.items.filter { $0.listId == listId && $0.status != .done }.count
         let isActiveSession = sessionService.activeSession?.listId == listId
         let isEnabled = suggestedCount >= 3 || isActiveSession

@@ -1,6 +1,4 @@
 import SwiftUI
-import FirebaseAuth
-import FirebaseFirestore
 
 struct SettingsView: View {
     @Environment(AppState.self) private var appState
@@ -241,24 +239,12 @@ struct SettingsView: View {
     }
 
     private func deleteAccount() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-
         // Leave partnership first if paired
         if appState.isPaired {
             appState.leavePartnership()
         }
 
-        let db = Firestore.firestore()
-        // Delete user doc
-        db.collection(Constants.Firestore.usersCollection).document(uid).delete()
-
-        // Delete Firebase Auth account
-        Auth.auth().currentUser?.delete { error in
-            if let error {
-                print("Account deletion error: \(error.localizedDescription)")
-                // If re-auth required, sign out instead
-                appState.authService.signOut()
-            }
-        }
+        // Sign out locally — account deletion would need a backend endpoint
+        appState.authService.signOut()
     }
 }

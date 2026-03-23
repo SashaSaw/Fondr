@@ -1,6 +1,4 @@
 import Foundation
-import FirebaseAuth
-import FirebaseFirestore
 
 @Observable
 final class SessionService {
@@ -8,24 +6,11 @@ final class SessionService {
     var sessionHistory: [SwipeSession] = []
     var errorMessage: String?
 
-    private var listener: ListenerRegistration?
     private var currentPairId: String?
     private var currentPair: Pair?
-    private var db: Firestore { Firestore.firestore() }
-
-    deinit {
-        listener?.remove()
-    }
-
-    private var sessionsRef: CollectionReference? {
-        guard let pairId = currentPairId else { return nil }
-        return db.collection(Constants.Firestore.pairsCollection)
-            .document(pairId)
-            .collection(Constants.Sessions.collection)
-    }
 
     private var currentUid: String? {
-        Auth.auth().currentUser?.uid
+        TokenStore.shared.userId
     }
 
     // MARK: - Listener
@@ -35,34 +20,38 @@ final class SessionService {
         currentPairId = pairId
         currentPair = pair
 
-        // Listen for active sessions
-        listener = sessionsRef?
-            .whereField("status", isEqualTo: SessionStatus.active.rawValue)
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let self, let snapshot else {
-                    self?.errorMessage = error?.localizedDescription
-                    return
-                }
-                let sessions = snapshot.documents.compactMap { try? $0.data(as: SwipeSession.self) }
-
-                // Use earliest active session if multiple exist
-                self.activeSession = sessions.sorted(by: { $0.createdAt < $1.createdAt }).first
-
-                // Clean up stale sessions (>24h old)
-                let staleThreshold = Date().addingTimeInterval(-24 * 60 * 60)
-                for session in sessions where session.createdAt < staleThreshold {
-                    if let id = session.id {
-                        self.discardSession(sessionId: id)
-                    }
-                }
+        // Initial load
+        Task {
+            do {
+                let session: SwipeSession? = try await APIClient.shared.get("/pairs/\(pairId)/sessions/active")
+                await MainActor.run { self.activeSession = session }
+            } catch {
+                // No active session is fine
+                await MainActor.run { self.activeSession = nil }
             }
-
+        }
         loadHistory()
+
+        // WebSocket events
+        WebSocketManager.shared.on("session:created") { [weak self] (session: SwipeSession) in
+            self?.activeSession = session
+        }
+        WebSocketManager.shared.on("session:updated") { [weak self] (session: SwipeSession) in
+            if session.status == .complete {
+                self?.activeSession = nil
+                self?.sessionHistory.insert(session, at: 0)
+            } else {
+                self?.activeSession = session
+            }
+        }
+        WebSocketManager.shared.on("session:deleted") { [weak self] (payload: DeletePayload) in
+            if self?.activeSession?.id == payload.id {
+                self?.activeSession = nil
+            }
+        }
     }
 
     func stopListening() {
-        listener?.remove()
-        listener = nil
         activeSession = nil
         sessionHistory = []
         currentPairId = nil
@@ -72,8 +61,7 @@ final class SessionService {
     // MARK: - Session Management
 
     func startSession(listId: String, items: [ListItem]) async throws {
-        guard let uid = currentUid,
-              let sessionsRef else {
+        guard let pairId = currentPairId else {
             throw SessionError.notAuthenticated
         }
 
@@ -82,133 +70,70 @@ final class SessionService {
             throw SessionError.notEnoughItems
         }
 
-        let matchedItems = suggestedItems.filter { $0.status == .matched }
-        for item in matchedItems {
-            guard let itemId = item.id else { continue }
-            await updateItemStatus(itemId: itemId, to: .suggested)
+        let body = StartSessionBody(listId: listId)
+        let session: SwipeSession = try await APIClient.shared.post("/pairs/\(pairId)/sessions", body: body)
+        await MainActor.run {
+            self.activeSession = session
         }
-
-        let itemIds = suggestedItems.compactMap(\.id).shuffled()
-
-        let session = SwipeSession(
-            listId: listId,
-            itemIds: itemIds,
-            swipesA: [:],
-            swipesB: [:],
-            matches: [],
-            status: .active,
-            startedBy: uid,
-            createdAt: Date()
-        )
-
-        try sessionsRef.addDocument(from: session)
     }
 
     func submitSwipe(sessionId: String, itemId: String, direction: String) {
-        guard let sessionsRef,
-              let uid = currentUid,
-              let pair = currentPair else { return }
-
-        let isUserA = uid == pair.userA
-        let swipeField = isUserA ? "swipesA" : "swipesB"
-        let otherSwipeField = isUserA ? "swipesB" : "swipesA"
+        guard let pairId = currentPairId else { return }
 
         Task {
             do {
-                let docRef = sessionsRef.document(sessionId)
-                let snapshot = try await docRef.getDocument()
-                guard var session = try? snapshot.data(as: SwipeSession.self) else { return }
-
-                // Record the swipe
-                if isUserA {
-                    session.swipesA[itemId] = direction
-                } else {
-                    session.swipesB[itemId] = direction
-                }
-
-                var updateData: [String: Any] = [
-                    swipeField: isUserA ? session.swipesA : session.swipesB
-                ]
-
-                // Check for match
-                let otherSwipes = isUserA ? session.swipesB : session.swipesA
-                if direction == "right", otherSwipes[itemId] == "right" {
-                    session.matches.append(itemId)
-                    updateData["matches"] = session.matches
-
-                    // Update the ListItem status to matched
-                    await updateItemStatus(itemId: itemId, to: .matched)
-                }
-
-                // Check if this user is done
-                let mySwipes = isUserA ? session.swipesA : session.swipesB
-                let allUsersDone = mySwipes.count == session.itemIds.count && otherSwipes.count == session.itemIds.count
-
-                if allUsersDone {
-                    updateData["status"] = SessionStatus.complete.rawValue
-                    updateData["completedAt"] = Date()
-                }
-
-                try await docRef.updateData(updateData)
-            } catch {
+                let body = SwipeBody(itemId: itemId, direction: direction)
+                let session: SwipeSession = try await APIClient.shared.post(
+                    "/pairs/\(pairId)/sessions/\(sessionId)/swipe",
+                    body: body
+                )
                 await MainActor.run {
-                    self.errorMessage = error.localizedDescription
+                    self.activeSession = session
                 }
+            } catch {
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
 
     func chooseMatch(sessionId: String, chosenItemId: String, allMatchIds: [String]) {
-        guard let sessionsRef else { return }
+        guard let pairId = currentPairId else { return }
 
         Task {
             do {
-                // Set the chosen item on the session
-                try await sessionsRef.document(sessionId).updateData([
-                    "chosenItemId": chosenItemId
-                ])
-
-                // Revert non-chosen matches back to suggested
-                for matchId in allMatchIds where matchId != chosenItemId {
-                    await updateItemStatus(itemId: matchId, to: .suggested)
-                }
+                let body = ChooseBody(chosenItemId: chosenItemId, allMatchIds: allMatchIds)
+                let _: SwipeSession = try await APIClient.shared.post(
+                    "/pairs/\(pairId)/sessions/\(sessionId)/choose",
+                    body: body
+                )
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
 
     func discardSession(sessionId: String) {
+        guard let pairId = currentPairId else { return }
+
         Task {
             do {
-                try await sessionsRef?.document(sessionId).delete()
+                try await APIClient.shared.delete("/pairs/\(pairId)/sessions/\(sessionId)")
+                await MainActor.run { self.activeSession = nil }
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
 
     func loadHistory() {
+        guard let pairId = currentPairId else { return }
+
         Task {
             do {
-                let snapshot = try await sessionsRef?
-                    .whereField("status", isEqualTo: SessionStatus.complete.rawValue)
-                    .order(by: "completedAt", descending: true)
-                    .limit(to: 10)
-                    .getDocuments()
-
-                let sessions = snapshot?.documents.compactMap { try? $0.data(as: SwipeSession.self) } ?? []
-                await MainActor.run {
-                    self.sessionHistory = sessions
-                }
+                let sessions: [SwipeSession] = try await APIClient.shared.get("/pairs/\(pairId)/sessions/history?limit=10")
+                await MainActor.run { self.sessionHistory = sessions }
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                }
+                await MainActor.run { self.errorMessage = error.localizedDescription }
             }
         }
     }
@@ -229,25 +154,6 @@ final class SessionService {
         mySwipeCount(in: session) == session.itemIds.count
     }
 
-    private func updateItemStatus(itemId: String, to status: ItemStatus) async {
-        guard let pairId = currentPairId else { return }
-
-        do {
-            try await db.collection(Constants.Firestore.pairsCollection)
-                .document(pairId)
-                .collection(Constants.Lists.collection)
-                .document(itemId)
-                .updateData([
-                    "status": status.rawValue,
-                    "updatedAt": Date()
-                ])
-        } catch {
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
-            }
-        }
-    }
-
     enum SessionError: LocalizedError {
         case notAuthenticated
         case notEnoughItems
@@ -259,4 +165,20 @@ final class SessionService {
             }
         }
     }
+}
+
+// MARK: - Request DTOs
+
+private struct StartSessionBody: Encodable {
+    let listId: String
+}
+
+private struct SwipeBody: Encodable {
+    let itemId: String
+    let direction: String
+}
+
+private struct ChooseBody: Encodable {
+    let chosenItemId: String
+    let allMatchIds: [String]
 }

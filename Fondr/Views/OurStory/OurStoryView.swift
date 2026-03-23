@@ -192,29 +192,35 @@ struct OurStoryView: View {
     }
 
     private func upcomingDateCard(_ upcoming: UpcomingDate) -> some View {
-        FondrCard {
-            HStack(spacing: 12) {
-                Text(upcoming.emoji)
-                    .font(.system(size: 32))
+        HStack(spacing: 12) {
+            Text(upcoming.emoji)
+                .font(.system(size: 32))
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(upcoming.title)
-                        .font(.system(.body, design: .rounded, weight: .medium))
-                    Text(upcoming.date, style: .date)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Text(upcoming.daysUntil == 0 ? "Today!" : "in \(upcoming.daysUntil)d")
-                    .font(.system(.caption, design: .rounded, weight: .semibold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(upcoming.daysUntil == 0 ? Color.fondrAccent : Color.fondrSecondary.opacity(0.2))
-                    .foregroundStyle(upcoming.daysUntil == 0 ? .white : .fondrSecondary)
-                    .clipShape(Capsule())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(upcoming.title)
+                    .font(.system(.body, design: .rounded, weight: .medium))
+                Text(upcoming.date, style: .date)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
+
+            Spacer()
+
+            Text(upcoming.daysUntil == 0 ? "Today!" : "in \(upcoming.daysUntil)d")
+                .font(.system(.caption, design: .rounded, weight: .semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(upcoming.daysUntil == 0 ? Color.fondrAccent : Color.fondrSecondary.opacity(0.2))
+                .foregroundStyle(upcoming.daysUntil == 0 ? .white : .fondrSecondary)
+                .clipShape(Capsule())
         }
+        .padding()
+        .background(upcoming.isCalendarEvent ? Color.fondrAccent.opacity(0.12) : Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.fondrAccent, lineWidth: upcoming.isCalendarEvent ? 1.5 : 0)
+        )
+        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
     }
 }

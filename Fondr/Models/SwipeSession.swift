@@ -1,8 +1,7 @@
 import Foundation
-import FirebaseFirestore
 
 struct SwipeSession: Identifiable, Codable, Sendable, Equatable {
-    @DocumentID var id: String?
+    var id: String
     var listId: String
     var itemIds: [String]
     var swipesA: [String: String]
@@ -13,6 +12,12 @@ struct SwipeSession: Identifiable, Codable, Sendable, Equatable {
     var createdAt: Date
     var completedAt: Date?
     var chosenItemId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, listId, itemIds, swipesA, swipesB, matches, status
+        case startedBy = "startedById"
+        case createdAt, completedAt, chosenItemId
+    }
 }
 
 enum SessionStatus: String, Codable, Sendable {

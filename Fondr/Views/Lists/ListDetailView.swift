@@ -9,19 +9,19 @@ struct ListDetailView: View {
     @State private var showEditSheet = false
 
     private var filteredItems: [ListItem] {
-        listService.items(for: list.id ?? "", status: selectedStatus)
+        listService.items(for: list.id, status: selectedStatus)
     }
 
     private var totalCount: Int {
-        listService.itemCount(for: list.id ?? "")
+        listService.itemCount(for: list.id)
     }
 
     private var matchedCount: Int {
-        listService.matchedCount(for: list.id ?? "")
+        listService.matchedCount(for: list.id)
     }
 
     private var showMediaDetails: Bool {
-        listService.isWatchList(list.id ?? "")
+        listService.isWatchList(list.id)
     }
 
     private var emptySubtitle: String {
@@ -64,9 +64,7 @@ struct ListDetailView: View {
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             if item.status != .done {
                                 Button(role: .destructive) {
-                                    if let id = item.id {
-                                        listService.deleteItem(itemId: id)
-                                    }
+                                    listService.deleteItem(itemId: item.id)
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
@@ -75,9 +73,7 @@ struct ListDetailView: View {
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             if item.status == .matched {
                                 Button {
-                                    if let id = item.id {
-                                        listService.markAsDone(itemId: id, note: nil)
-                                    }
+                                    listService.markAsDone(itemId: item.id, note: nil)
                                 } label: {
                                     Label("Done", systemImage: "checkmark")
                                 }
@@ -108,7 +104,7 @@ struct ListDetailView: View {
             }
         }
         .sheet(isPresented: $showAddSheet) {
-            AddItemSheet(listId: list.id ?? "")
+            AddItemSheet(listId: list.id)
         }
         .sheet(isPresented: $showEditSheet) {
             CreateListSheet(editing: list, onDelete: { dismiss() })
