@@ -60,6 +60,12 @@ export class SessionsService {
         where: { id: { in: matchedIds } },
         data: { status: 'suggested' },
       });
+      const resetItems = await this.prisma.listItem.findMany({
+        where: { id: { in: matchedIds } },
+      });
+      for (const item of resetItems) {
+        this.events.emit('item.updated', { pairId, item });
+      }
     }
 
     // Shuffle item IDs
@@ -125,13 +131,14 @@ export class SessionsService {
       const matches: string[] = session.matches as string[];
       const otherSwipes = isUserA ? swipesB : swipesA;
       let newMatch = false;
+      let matchedItem: any = undefined;
 
       if (dto.direction === 'right' && otherSwipes[dto.itemId] === 'right') {
         matches.push(dto.itemId);
         newMatch = true;
 
         // Update list item status to matched
-        await tx.listItem.update({
+        matchedItem = await tx.listItem.update({
           where: { id: dto.itemId },
           data: { status: 'matched' },
         });
@@ -159,8 +166,12 @@ export class SessionsService {
         data: updateData,
       });
 
-      return { session: updated, newMatch };
+      return { session: updated, newMatch, matchedItem };
     });
+
+    if (result.newMatch && result.matchedItem) {
+      this.events.emit('item.updated', { pairId, item: result.matchedItem });
+    }
 
     this.events.emit('session.updated', {
       pairId,
@@ -191,7 +202,20 @@ export class SessionsService {
         where: { id: { in: revertIds } },
         data: { status: 'suggested' },
       });
+      const revertedItems = await this.prisma.listItem.findMany({
+        where: { id: { in: revertIds } },
+      });
+      for (const item of revertedItems) {
+        this.events.emit('item.updated', { pairId, item });
+      }
     }
+
+    // Ensure chosen item is marked as matched
+    const chosenItem = await this.prisma.listItem.update({
+      where: { id: dto.chosenItemId },
+      data: { status: 'matched' },
+    });
+    this.events.emit('item.updated', { pairId, item: chosenItem });
 
     this.events.emit('session.updated', { pairId, session: updated });
     return updated;
