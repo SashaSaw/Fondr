@@ -74,6 +74,11 @@ struct ContentView: View {
             appState.setupCalendarListener()
             appState.setupNotificationListener()
         }
+        .onChange(of: WebSocketManager.shared.isConnected) { wasConnected, isNowConnected in
+            if isNowConnected && !wasConnected && appState.isPaired {
+                appState.calendarService.refreshData()
+            }
+        }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active && appState.isAuthenticated {
                 // Reconnect WebSocket and reload state on foreground

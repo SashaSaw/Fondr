@@ -340,13 +340,13 @@ struct SharedCalendarView: View {
             }
             .frame(height: 26)
 
-            if hasMine || hasPartner {
-                heartIndicator(hasMine: hasMine, hasPartner: hasPartner)
-            } else if hasEvent {
+            if hasEvent {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(Color.fondrAccent)
                     .frame(height: 20)
+            } else if hasMine || hasPartner {
+                heartIndicator(hasMine: hasMine, hasPartner: hasPartner)
             } else {
                 Spacer().frame(height: 20)
             }
@@ -408,7 +408,7 @@ struct SharedCalendarView: View {
         if hasEvent {
             return Color.fondrAccent.opacity(0.15)
         }
-        return Color(.secondarySystemBackground)
+        return Color.fondrCardBackground
     }
 
     // MARK: - Legend

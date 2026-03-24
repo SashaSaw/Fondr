@@ -61,7 +61,9 @@ final class CalendarService {
             self?.slots.removeAll { $0.id == payload.id }
         }
         WebSocketManager.shared.on("event:created") { [weak self] (event: CalendarEvent) in
-            self?.events.append(event)
+            if !(self?.events.contains(where: { $0.id == event.id }) ?? false) {
+                self?.events.append(event)
+            }
         }
         WebSocketManager.shared.on("event:updated") { [weak self] (event: CalendarEvent) in
             if let i = self?.events.firstIndex(where: { $0.id == event.id }) {
@@ -82,6 +84,25 @@ final class CalendarService {
         events = []
         partnerTimezone = nil
         currentPairId = nil
+    }
+
+    // MARK: - Refresh
+
+    func refreshData() {
+        guard let pairId = currentPairId else { return }
+        Task {
+            do {
+                async let loadedSlots: [AvailabilitySlot] = APIClient.shared.get("/pairs/\(pairId)/availability")
+                async let loadedEvents: [CalendarEvent] = APIClient.shared.get("/pairs/\(pairId)/events")
+                let (s, e) = try await (loadedSlots, loadedEvents)
+                await MainActor.run {
+                    self.slots = s
+                    self.events = e
+                }
+            } catch {
+                // Silent — just a background refresh
+            }
+        }
     }
 
     // MARK: - Availability CRUD
