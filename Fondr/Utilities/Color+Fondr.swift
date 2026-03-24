@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 extension Color {
     /// Rose/coral primary
@@ -24,6 +25,13 @@ extension Color {
 
     /// Warm purple — overlap indicator (#9B7FBF)
     static let fondrOverlap = Color(red: 0.608, green: 0.498, blue: 0.749)
+
+    /// Adaptive card background — white in light, secondarySystemBackground in dark
+    static let fondrCardBackground = Color(UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark
+            ? .secondarySystemBackground
+            : .white
+    })
 }
 
 extension ShapeStyle where Self == Color {
@@ -35,4 +43,5 @@ extension ShapeStyle where Self == Color {
     static var fondrYou: Color { Color.fondrYou }
     static var fondrPartner: Color { Color.fondrPartner }
     static var fondrOverlap: Color { Color.fondrOverlap }
+    static var fondrCardBackground: Color { Color.fondrCardBackground }
 }

@@ -74,6 +74,10 @@ final class CalendarService {
     }
 
     func stopListening() {
+        WebSocketManager.shared.removeHandlers(for: [
+            "availability:created", "availability:updated", "availability:deleted",
+            "event:created", "event:updated", "event:deleted"
+        ])
         slots = []
         events = []
         partnerTimezone = nil

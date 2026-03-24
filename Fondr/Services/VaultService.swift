@@ -49,6 +49,9 @@ final class VaultService {
     }
 
     func stopListening() {
+        WebSocketManager.shared.removeHandlers(for: [
+            "vault:created", "vault:updated", "vault:deleted"
+        ])
         facts = []
         currentPairId = nil
     }

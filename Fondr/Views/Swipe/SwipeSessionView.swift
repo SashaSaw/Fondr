@@ -16,6 +16,11 @@ struct SwipeSessionView: View {
     @State private var showResults = false
     @State private var selectedMatchId: String?
     @State private var hasChosen = false
+    @State private var buttonSwipeDirection: String?
+
+    private var liveSession: SwipeSession {
+        sessionService.activeSession ?? session
+    }
 
     private var sortedItems: [ListItem] {
         session.itemIds.compactMap { itemId in
@@ -24,11 +29,11 @@ struct SwipeSessionView: View {
     }
 
     private var myProgress: Int {
-        sessionService.mySwipeCount(in: session)
+        sessionService.mySwipeCount(in: liveSession)
     }
 
     private var partnerProgress: Int {
-        sessionService.partnerSwipeCount(in: session)
+        sessionService.partnerSwipeCount(in: liveSession)
     }
 
     private var partnerName: String {
@@ -36,7 +41,7 @@ struct SwipeSessionView: View {
     }
 
     private var isFinished: Bool {
-        sessionService.hasUserFinished(session: session)
+        currentIndex >= sortedItems.count
     }
 
     var body: some View {
@@ -46,15 +51,28 @@ struct SwipeSessionView: View {
                 matchOverlay
             }
         }
-        .onChange(of: session.status) { _, newValue in
+        .onAppear {
+            currentIndex = myProgress
+        }
+        .onChange(of: liveSession.status) { _, newValue in
             if newValue == .complete {
                 showResults = true
             }
         }
-        .onChange(of: session.chosenItemId) { _, newValue in
+        .onChange(of: liveSession.chosenItemId) { _, newValue in
             if let newValue {
                 selectedMatchId = newValue
                 hasChosen = true
+            }
+        }
+        .onChange(of: liveSession.matches.count) { oldCount, newCount in
+            if newCount > oldCount,
+               let lastMatch = liveSession.matches.last,
+               let item = items.first(where: { $0.id == lastMatch }) {
+                matchedItemTitle = item.title
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                    showMatchOverlay = true
+                }
             }
         }
     }
@@ -66,7 +84,7 @@ struct SwipeSessionView: View {
             topBar
             partnerIndicator
 
-            if showResults || session.status == .complete {
+            if showResults || liveSession.status == .complete {
                 resultsView
             } else if isFinished {
                 waitingView
@@ -96,10 +114,10 @@ struct SwipeSessionView: View {
 
             Spacer()
 
-            Text("\(myProgress + 1 > session.itemIds.count ? session.itemIds.count : myProgress + 1) of \(session.itemIds.count)")
+            Text("\(min(currentIndex + 1, liveSession.itemIds.count)) of \(liveSession.itemIds.count)")
                 .font(.system(.subheadline, design: .rounded, weight: .medium))
                 .foregroundStyle(.secondary)
-                .accessibilityLabel("Item \(min(myProgress + 1, session.itemIds.count)) of \(session.itemIds.count)")
+                .accessibilityLabel("Item \(min(currentIndex + 1, liveSession.itemIds.count)) of \(liveSession.itemIds.count)")
 
             Spacer()
 
@@ -110,7 +128,7 @@ struct SwipeSessionView: View {
         .padding(.top, 8)
         .confirmationDialog("Leave session?", isPresented: $showDiscardConfirmation, titleVisibility: .visible) {
             Button("Discard Session", role: .destructive) {
-                sessionService.discardSession(sessionId: session.id)
+                sessionService.discardSession(sessionId: liveSession.id)
                 onDismiss()
             }
             Button("Keep for Later", role: .cancel) {
@@ -128,7 +146,7 @@ struct SwipeSessionView: View {
             if partnerProgress == 0 {
                 Text("\(partnerName) hasn't started yet")
             } else {
-                Text("\(partnerName) has swiped \(partnerProgress) of \(session.itemIds.count)")
+                Text("\(partnerName) has swiped \(partnerProgress) of \(liveSession.itemIds.count)")
             }
         }
         .font(.system(.caption, design: .rounded))
@@ -142,13 +160,14 @@ struct SwipeSessionView: View {
         ZStack {
             // Show next 2 cards behind
             ForEach(Array(sortedItems.enumerated().reversed()), id: \.element.id) { index, item in
-                if index >= myProgress && index <= myProgress + 2 {
-                    let offset = index - myProgress
+                if index >= currentIndex && index <= currentIndex + 2 {
+                    let offset = index - currentIndex
                     if offset == 0 {
                         SwipeCardView(
                             item: item,
                             isWatchList: isWatchList,
-                            onSwipe: { direction in handleSwipe(direction: direction) }
+                            onSwipe: { direction in handleSwipe(direction: direction) },
+                            triggerDirection: buttonSwipeDirection
                         )
                         .accessibilityLabel("\(item.title)")
                         .accessibilityHint("Swipe right to say yes, swipe left to skip")
@@ -200,7 +219,7 @@ struct SwipeSessionView: View {
     private var swipeButtons: some View {
         HStack(spacing: 32) {
             Button {
-                handleSwipe(direction: "left")
+                buttonSwipeDirection = "left"
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "forward")
@@ -218,7 +237,7 @@ struct SwipeSessionView: View {
             .accessibilityLabel("Skip this idea")
 
             Button {
-                handleSwipe(direction: "right")
+                buttonSwipeDirection = "right"
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark")
@@ -298,7 +317,7 @@ struct SwipeSessionView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
-            Text("\(partnerName) has swiped \(partnerProgress) of \(session.itemIds.count)")
+            Text("\(partnerName) has swiped \(partnerProgress) of \(liveSession.itemIds.count)")
                 .font(.system(.caption, design: .rounded))
                 .foregroundStyle(.tertiary)
 
@@ -319,9 +338,9 @@ struct SwipeSessionView: View {
     private var resultsView: some View {
         ScrollView {
             VStack(spacing: 20) {
-                if session.matches.isEmpty {
+                if liveSession.matches.isEmpty {
                     noMatchesView
-                } else if hasChosen || session.chosenItemId != nil {
+                } else if hasChosen || liveSession.chosenItemId != nil {
                     chosenView
                 } else {
                     pickMatchView
@@ -372,14 +391,14 @@ struct SwipeSessionView: View {
         VStack(spacing: 20) {
             Text("✨")
                 .font(.system(size: 64))
-            Text("\(session.matches.count) Match\(session.matches.count == 1 ? "" : "es")!")
+            Text("\(liveSession.matches.count) Match\(liveSession.matches.count == 1 ? "" : "es")!")
                 .font(.system(.largeTitle, design: .rounded, weight: .bold))
 
             Text("Pick the one you want to go with:")
                 .font(.system(.body, design: .rounded))
                 .foregroundStyle(.secondary)
 
-            ForEach(session.matches, id: \.self) { matchId in
+            ForEach(liveSession.matches, id: \.self) { matchId in
                 if let item = items.first(where: { $0.id == matchId }) {
                     Button {
                         HapticManager.shared.selection()
@@ -440,7 +459,7 @@ struct SwipeSessionView: View {
 
     private var chosenView: some View {
         VStack(spacing: 16) {
-            let chosenId = session.chosenItemId ?? selectedMatchId
+            let chosenId = liveSession.chosenItemId ?? selectedMatchId
             let chosenItem = items.first(where: { $0.id == chosenId })
 
             Text("🎉")
@@ -473,11 +492,11 @@ struct SwipeSessionView: View {
     // MARK: - Result Actions
 
     private func confirmChoice(itemId: String) {
-        let sessionId = session.id
+        let sessionId = liveSession.id
         sessionService.chooseMatch(
             sessionId: sessionId,
             chosenItemId: itemId,
-            allMatchIds: session.matches
+            allMatchIds: liveSession.matches
         )
         HapticManager.shared.success()
         withAnimation(.spring(response: 0.4)) {
@@ -486,9 +505,9 @@ struct SwipeSessionView: View {
     }
 
     private func restartSession() {
-        let sessionId = session.id
+        let sessionId = liveSession.id
         // Revert all matches back to suggested before discarding
-        for matchId in session.matches {
+        for matchId in liveSession.matches {
             Task {
                 await revertItemStatus(itemId: matchId)
             }
@@ -506,36 +525,27 @@ struct SwipeSessionView: View {
     // MARK: - Actions
 
     private func handleSwipe(direction: String) {
-        guard myProgress < sortedItems.count else { return }
-        let sessionId = session.id
+        guard currentIndex < sortedItems.count else { return }
+        let sessionId = liveSession.id
 
-        let currentItem = sortedItems[myProgress]
+        let currentItem = sortedItems[currentIndex]
         let itemId = currentItem.id
+        let previousIndex = currentIndex
 
-        sessionService.submitSwipe(sessionId: sessionId, itemId: itemId, direction: direction)
+        currentIndex += 1  // optimistic
+        buttonSwipeDirection = nil
 
-        // Haptic for swipe completion
-        HapticManager.shared.medium()
-
-        // Check if this might cause a match
-        let partnerSwipes = sessionService.partnerSwipeCount(in: session) > 0
-        if direction == "right" && partnerSwipes {
-            // Check partner's swipe on this item
-            let pair = appState.pairService.currentPair
-            let isUserA = appState.authService.currentUserId == pair?.userA
-            let otherSwipes = isUserA ? session.swipesB : session.swipesA
-            if otherSwipes[itemId] == "right" {
-                matchedItemTitle = currentItem.title
-                HapticManager.shared.heavy()
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-                    showMatchOverlay = true
+        Task {
+            do {
+                let _ = try await sessionService.submitSwipe(
+                    sessionId: sessionId, itemId: itemId, direction: direction
+                )
+            } catch {
+                await MainActor.run {
+                    currentIndex = previousIndex
+                    HapticManager.shared.error()
                 }
             }
-        }
-
-        // Advance to next card
-        withAnimation(.spring(response: 0.3)) {
-            currentIndex = myProgress + 1
         }
     }
 }

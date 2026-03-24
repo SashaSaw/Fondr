@@ -90,11 +90,12 @@ export class SessionsService {
     // Use raw SQL for row-level locking to prevent race conditions
     const result = await this.prisma.$transaction(async (tx) => {
       // Lock the row
-      const rows = await tx.$queryRawUnsafe<any[]>(
-        `SELECT * FROM swipe_sessions WHERE id = $1 AND pair_id = $2 FOR UPDATE`,
-        sessionId,
-        pairId,
-      );
+      const rows = await tx.$queryRaw<any[]>`
+        SELECT * FROM swipe_sessions
+        WHERE id = ${sessionId}::uuid
+        AND pair_id = ${pairId}::uuid
+        FOR UPDATE
+      `;
 
       if (!rows || rows.length === 0) {
         throw new NotFoundException('Session not found');

@@ -57,6 +57,9 @@ final class OurStoryService {
     }
 
     func stopListening() {
+        WebSocketManager.shared.removeHandlers(for: [
+            "significant-date:created", "significant-date:updated", "significant-date:deleted"
+        ])
         significantDates = []
         currentPairId = nil
     }

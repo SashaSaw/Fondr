@@ -215,7 +215,7 @@ struct OurStoryView: View {
                 .clipShape(Capsule())
         }
         .padding()
-        .background(upcoming.isCalendarEvent ? Color.fondrAccent.opacity(0.12) : Color(.systemBackground))
+        .background(upcoming.isCalendarEvent ? Color.fondrAccent.opacity(0.12) : Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)

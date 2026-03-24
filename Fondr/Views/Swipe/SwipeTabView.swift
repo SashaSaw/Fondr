@@ -4,7 +4,7 @@ struct SwipeTabView: View {
     @Environment(SessionService.self) private var sessionService
     @Environment(ListService.self) private var listService
     @Environment(AppState.self) private var appState
-    @State private var showSession = false
+    @State private var manuallyDismissed = false
     @State private var sessionError: String?
     @State private var isStarting = false
 
@@ -14,21 +14,19 @@ struct SwipeTabView: View {
 
     var body: some View {
         NavigationStack {
-            if showSession, let session = sessionService.activeSession {
+            if !manuallyDismissed, let session = sessionService.activeSession {
                 SwipeSessionView(
                     session: session,
                     items: listService.items,
                     isWatchList: listService.isWatchList(session.listId),
-                    onDismiss: { showSession = false }
+                    onDismiss: { manuallyDismissed = true }
                 )
             } else {
                 launcher
             }
         }
-        .onChange(of: sessionService.activeSession) { _, newValue in
-            if newValue != nil && showSession == false {
-                // Auto-show if partner started a session
-            }
+        .onChange(of: sessionService.activeSession?.id) { _, _ in
+            manuallyDismissed = false
         }
     }
 
@@ -112,7 +110,7 @@ struct SwipeTabView: View {
             guard isEnabled else { return }
             HapticManager.shared.light()
             if isActiveSession {
-                showSession = true
+                manuallyDismissed = false
             } else {
                 startSession(listId: listId)
             }
@@ -178,7 +176,7 @@ struct SwipeTabView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(isActiveSession ? Color.fondrPrimary.opacity(0.08) : Color(.systemBackground))
+        .background(isActiveSession ? Color.fondrPrimary.opacity(0.08) : Color.fondrCardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
     }
@@ -255,7 +253,7 @@ struct SwipeTabView: View {
                     isStarting = false
                     // Active session listener will pick it up
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showSession = true
+                        manuallyDismissed = false
                     }
                 }
             } catch {

@@ -58,6 +58,12 @@ final class WebSocketManager {
         handlers[event, default: []].append(wrappedHandler)
     }
 
+    func removeHandlers(for events: [String]) {
+        for event in events {
+            handlers.removeValue(forKey: event)
+        }
+    }
+
     func removeAllHandlers() {
         handlers.removeAll()
     }

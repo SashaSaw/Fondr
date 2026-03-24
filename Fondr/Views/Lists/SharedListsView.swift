@@ -67,6 +67,7 @@ struct SharedListsView: View {
                         }
                         .buttonStyle(ListCardButtonStyle())
                     }
+                    .id(listService.lists.count)
                     .padding()
                 }
             }

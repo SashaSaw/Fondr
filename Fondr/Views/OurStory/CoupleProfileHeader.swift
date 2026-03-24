@@ -136,7 +136,7 @@ struct CoupleProfileHeader: View {
             .resizable()
             .scaledToFit()
             .foregroundStyle(tint)
-            .background(Color(.systemBackground))
+            .background(Color(.secondarySystemBackground))
             .clipShape(Circle())
     }
 

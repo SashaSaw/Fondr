@@ -52,6 +52,9 @@ final class SessionService {
     }
 
     func stopListening() {
+        WebSocketManager.shared.removeHandlers(for: [
+            "session:created", "session:updated", "session:deleted"
+        ])
         activeSession = nil
         sessionHistory = []
         currentPairId = nil
@@ -77,23 +80,18 @@ final class SessionService {
         }
     }
 
-    func submitSwipe(sessionId: String, itemId: String, direction: String) {
-        guard let pairId = currentPairId else { return }
+    func submitSwipe(sessionId: String, itemId: String, direction: String) async throws -> SwipeSession {
+        guard let pairId = currentPairId else { throw SessionError.notAuthenticated }
 
-        Task {
-            do {
-                let body = SwipeBody(itemId: itemId, direction: direction)
-                let session: SwipeSession = try await APIClient.shared.post(
-                    "/pairs/\(pairId)/sessions/\(sessionId)/swipe",
-                    body: body
-                )
-                await MainActor.run {
-                    self.activeSession = session
-                }
-            } catch {
-                await MainActor.run { self.errorMessage = error.localizedDescription }
-            }
+        let body = SwipeBody(itemId: itemId, direction: direction)
+        let session: SwipeSession = try await APIClient.shared.post(
+            "/pairs/\(pairId)/sessions/\(sessionId)/swipe",
+            body: body
+        )
+        await MainActor.run {
+            self.activeSession = session
         }
+        return session
     }
 
     func chooseMatch(sessionId: String, chosenItemId: String, allMatchIds: [String]) {

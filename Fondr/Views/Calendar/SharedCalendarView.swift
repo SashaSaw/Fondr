@@ -408,7 +408,7 @@ struct SharedCalendarView: View {
         if hasEvent {
             return Color.fondrAccent.opacity(0.15)
         }
-        return .white
+        return Color(.secondarySystemBackground)
     }
 
     // MARK: - Legend

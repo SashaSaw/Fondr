@@ -82,6 +82,10 @@ final class ListService {
     }
 
     func stopListening() {
+        WebSocketManager.shared.removeHandlers(for: [
+            "list:created", "list:updated", "list:deleted",
+            "item:created", "item:updated", "item:deleted"
+        ])
         items = []
         lists = []
         currentPairId = nil

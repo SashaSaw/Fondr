@@ -4,6 +4,7 @@ struct SwipeCardView: View {
     let item: ListItem
     let isWatchList: Bool
     let onSwipe: (String) -> Void
+    var triggerDirection: String? = nil
 
     @State private var offset: CGSize = .zero
     @State private var isDragging = false
@@ -34,6 +35,10 @@ struct SwipeCardView: View {
             .rotationEffect(.degrees(rotation))
             .offset(x: offset.width)
             .gesture(dragGesture)
+            .onChange(of: triggerDirection) { _, direction in
+                guard let direction else { return }
+                animateOffScreen(direction: direction)
+            }
     }
 
     // MARK: - Card Content
@@ -166,28 +171,30 @@ struct SwipeCardView: View {
             .onEnded { value in
                 isDragging = false
                 if value.translation.width > swipeThreshold {
-                    HapticManager.shared.medium()
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        offset.width = 500
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        onSwipe("right")
-                        offset = .zero
-                    }
+                    animateOffScreen(direction: "right")
                 } else if value.translation.width < -swipeThreshold {
-                    HapticManager.shared.light()
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        offset.width = -500
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        onSwipe("left")
-                        offset = .zero
-                    }
+                    animateOffScreen(direction: "left")
                 } else {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                         offset = .zero
                     }
                 }
             }
+    }
+
+    private func animateOffScreen(direction: String) {
+        let xOffset: CGFloat = direction == "right" ? 500 : -500
+        if direction == "right" {
+            HapticManager.shared.medium()
+        } else {
+            HapticManager.shared.light()
+        }
+        withAnimation(.easeOut(duration: 0.3)) {
+            offset.width = xOffset
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            onSwipe(direction)
+            offset = .zero
+        }
     }
 }
