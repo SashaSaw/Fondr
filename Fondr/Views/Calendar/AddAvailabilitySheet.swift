@@ -11,6 +11,7 @@ struct AddAvailabilitySheet: View {
     @State private var addTime: Bool
     @State private var startTime: Date
     @State private var endTime: Date
+    @State private var isSaving = false
 
     private let editingEventId: String?
 
@@ -170,7 +171,7 @@ struct AddAvailabilitySheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { save() }
-                        .disabled(!canSave)
+                        .disabled(!canSave || isSaving)
                 }
             }
         }
@@ -179,6 +180,9 @@ struct AddAvailabilitySheet: View {
     // MARK: - Save
 
     private func save() {
+        guard !isSaving else { return }
+        isSaving = true
+
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
 

@@ -26,24 +26,16 @@ final class AppState {
         return pair.status == .active
     }
 
-    var partnerDisplayName: String? = nil
-
     var partnerName: String? {
-        partnerDisplayName ?? authService.appUser?.partnerName
+        guard let pair = pairService.currentPair,
+              let myId = authService.currentUserId else { return nil }
+        return (myId == pair.userA ? pair.userBProfile : pair.userAProfile)?.displayName
     }
 
-    func fetchPartnerDisplayName() {
-        // Partner name comes from the pair endpoint response
-        // which includes user data; no separate Firestore call needed
-        if let pair = pairService.currentPair {
-            let uid = TokenStore.shared.userId
-            // The partner's display name will be loaded when we reload the user
-            if uid == pair.userA {
-                // We are userA, partner is userB
-            } else {
-                // We are userB, partner is userA
-            }
-        }
+    var partnerProfileImageUrl: String? {
+        guard let pair = pairService.currentPair,
+              let myId = authService.currentUserId else { return nil }
+        return (myId == pair.userA ? pair.userBProfile : pair.userAProfile)?.profileImageUrl
     }
 
     var userTimezone: String? {

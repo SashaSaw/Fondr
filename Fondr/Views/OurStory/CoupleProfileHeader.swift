@@ -7,8 +7,7 @@ struct CoupleProfileHeader: View {
     let yourName: String
     let partnerName: String
     let yourImageUrl: String?
-    @Binding var partnerImageUrl: String?
-    let partnerUid: String?
+    let partnerImageUrl: String?
     var onImageUploaded: (String) -> Void
     var onImageRemoved: (() -> Void)?
 
@@ -64,9 +63,6 @@ struct CoupleProfileHeader: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(profileImageService.errorMessage ?? "Could not upload photo. It will be saved locally until the next attempt.")
-        }
-        .task {
-            await fetchPartnerImage()
         }
     }
 
@@ -166,9 +162,4 @@ struct CoupleProfileHeader: View {
         onImageRemoved?()
     }
 
-    private func fetchPartnerImage() async {
-        guard let partnerUid, partnerImageUrl == nil else { return }
-        // Partner image URL comes from the pair data which includes user info
-        // For now, we don't have a separate endpoint — the pair GET includes user data
-    }
 }

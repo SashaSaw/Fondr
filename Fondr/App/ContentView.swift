@@ -12,7 +12,15 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if !appState.isAuthenticated {
+            if !appState.authService.isReady {
+                VStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.fondrBackground)
+            } else if !appState.isAuthenticated {
                 SignInView()
             } else if appState.needsOnboarding {
                 OnboardingView()
@@ -65,7 +73,6 @@ struct ContentView: View {
         .onChange(of: appState.authService.appUser?.partnerUid) { _, _ in
             appState.setupCalendarListener()
             appState.setupNotificationListener()
-            appState.fetchPartnerDisplayName()
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active && appState.isAuthenticated {

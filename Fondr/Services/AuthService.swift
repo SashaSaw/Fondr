@@ -13,6 +13,7 @@ final class AuthService {
     var appUser: AppUser?
     var errorMessage: String?
     var isLoading = false
+    var isReady = false
 
     var isAuthenticated: Bool {
         TokenStore.shared.isLoggedIn
@@ -27,7 +28,10 @@ final class AuthService {
         if TokenStore.shared.isLoggedIn {
             Task {
                 await loadCurrentUser()
+                await MainActor.run { isReady = true }
             }
+        } else {
+            isReady = true
         }
     }
 

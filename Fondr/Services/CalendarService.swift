@@ -158,15 +158,6 @@ final class CalendarService {
     func addEvent(title: String, description: String?, startDate: String, endDate: String, startTime: String?, endTime: String?) {
         guard let pairId = currentPairId else { return }
 
-        var event = CalendarEvent(
-            title: title, description: description,
-            startDate: startDate, endDate: endDate,
-            startTime: startTime, endTime: endTime,
-            createdBy: TokenStore.shared.userId ?? ""
-        )
-        event.id = UUID().uuidString
-        events.append(event) // Optimistic
-
         Task {
             do {
                 let body = CreateEventBody(
@@ -175,6 +166,7 @@ final class CalendarService {
                     startTime: startTime, endTime: endTime
                 )
                 let _: CalendarEvent = try await APIClient.shared.post("/pairs/\(pairId)/events", body: body)
+                // WebSocket "event:created" handler will add the event to the array
             } catch {
                 await MainActor.run { self.errorMessage = error.localizedDescription }
             }

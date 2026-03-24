@@ -94,9 +94,16 @@ export class PairsService {
       data: { partnerId: userId },
     });
 
-    this.events.emit('pair.activated', { pair: updatedPair });
+    const fullPair = await this.prisma.pair.findUnique({
+      where: { id: pair.id },
+      include: {
+        userA: { select: { id: true, displayName: true, profileImageUrl: true, timezone: true } },
+        userB: { select: { id: true, displayName: true, profileImageUrl: true, timezone: true } },
+      },
+    });
+    this.events.emit('pair.activated', { pair: fullPair });
 
-    return updatedPair;
+    return fullPair;
   }
 
   async update(pairId: string, anniversary?: string) {
@@ -105,9 +112,17 @@ export class PairsService {
       data.anniversary = new Date(anniversary);
     }
 
-    const pair = await this.prisma.pair.update({
+    await this.prisma.pair.update({
       where: { id: pairId },
       data,
+    });
+
+    const pair = await this.prisma.pair.findUnique({
+      where: { id: pairId },
+      include: {
+        userA: { select: { id: true, displayName: true, profileImageUrl: true, timezone: true } },
+        userB: { select: { id: true, displayName: true, profileImageUrl: true, timezone: true } },
+      },
     });
 
     this.events.emit('pair.updated', { pair });
