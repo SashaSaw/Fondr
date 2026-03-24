@@ -4,6 +4,7 @@ import {
   Patch,
   Put,
   Post,
+  Delete,
   Body,
   UseGuards,
   UseInterceptors,
@@ -47,6 +48,11 @@ export class UsersController {
     @Body() dto: UpdateApnsTokenDto,
   ) {
     return this.usersService.updateApnsToken(user.sub, dto.token);
+  }
+
+  @Delete('me')
+  async deleteMe(@CurrentUser() user: JwtPayload) {
+    return this.usersService.deleteMe(user.sub);
   }
 
   @Post('me/profile-image')

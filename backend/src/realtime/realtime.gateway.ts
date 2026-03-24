@@ -127,6 +127,11 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     this.broadcastToPair(payload.pair.id, 'pair:updated', payload.pair);
   }
 
+  @OnEvent('pair.deleted')
+  handlePairDeleted(payload: { pairId: string }) {
+    this.broadcastToPair(payload.pairId, 'pair:deleted', { id: payload.pairId });
+  }
+
   // --- Vault events ---
 
   @OnEvent('vault.created')

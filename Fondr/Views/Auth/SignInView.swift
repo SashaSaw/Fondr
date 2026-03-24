@@ -21,7 +21,7 @@ struct SignInView: View {
                     Text("Fondr")
                         .font(.system(.largeTitle, design: .rounded, weight: .bold))
                         .foregroundStyle(.fondrPrimary)
-                    Text("Stay close, no matter the distance")
+                    Text("Distance makes the heart grow with Fondr.")
                         .font(.system(.subheadline, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
@@ -78,6 +78,7 @@ struct SignInView: View {
                 Spacer()
             }
             .padding(.horizontal, 24)
+            .background(Color.fondrBackground)
             .disabled(authService.isLoading)
             .overlay {
                 if authService.isLoading {

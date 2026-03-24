@@ -193,7 +193,7 @@ struct SettingsView: View {
             TextField("Type UNPAIR to confirm", text: $unpairText)
                 .textInputAutocapitalization(.characters)
             Button("Leave", role: .destructive) {
-                guard unpairText == "UNPAIR" else { return }
+                guard unpairText.uppercased() == "UNPAIR" else { return }
                 HapticManager.shared.heavy()
                 appState.leavePartnership()
                 unpairText = ""
@@ -206,7 +206,7 @@ struct SettingsView: View {
             TextField("Type DELETE to confirm", text: $deleteText)
                 .textInputAutocapitalization(.characters)
             Button("Delete Forever", role: .destructive) {
-                guard deleteText == "DELETE" else { return }
+                guard deleteText.uppercased() == "DELETE" else { return }
                 HapticManager.shared.heavy()
                 deleteAccount()
                 deleteText = ""
@@ -239,12 +239,12 @@ struct SettingsView: View {
     }
 
     private func deleteAccount() {
-        // Leave partnership first if paired
-        if appState.isPaired {
-            appState.leavePartnership()
+        Task {
+            do {
+                try await appState.authService.deleteAccount()
+            } catch {
+                appState.authService.signOut()
+            }
         }
-
-        // Sign out locally — account deletion would need a backend endpoint
-        appState.authService.signOut()
     }
 }

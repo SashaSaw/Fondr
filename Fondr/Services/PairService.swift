@@ -54,7 +54,7 @@ final class PairService {
     // MARK: - Listen to Pair (load + WebSocket)
 
     func listenToPair(pairId: String) {
-        WebSocketManager.shared.removeHandlers(for: ["pair:updated"])
+        WebSocketManager.shared.removeHandlers(for: ["pair:updated", "pair:deleted"])
         Task {
             do {
                 let pair: Pair = try await APIClient.shared.get("/pairs/\(pairId)")
@@ -71,6 +71,9 @@ final class PairService {
         // WebSocket updates
         WebSocketManager.shared.on("pair:updated") { [weak self] (pair: Pair) in
             self?.currentPair = pair
+        }
+        WebSocketManager.shared.on("pair:deleted") { [weak self] (payload: DeletePayload) in
+            self?.currentPair = nil
         }
     }
 

@@ -141,6 +141,9 @@ export class PairsService {
       data: { pairId: null, partnerId: null },
     });
 
+    // Notify partner before deleting
+    this.events.emit('pair.deleted', { pairId });
+
     // Delete pair (cascades subcollection data)
     await this.prisma.pair.delete({ where: { id: pairId } });
 

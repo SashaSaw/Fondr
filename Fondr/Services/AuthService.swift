@@ -120,6 +120,11 @@ final class AuthService {
         appUser = nil
     }
 
+    func deleteAccount() async throws {
+        let _: SuccessResponse = try await APIClient.shared.delete("/users/me")
+        await MainActor.run { signOut() }
+    }
+
     // MARK: - User Profile
 
     func updateUserDoc(_ updates: [String: Any]) {
