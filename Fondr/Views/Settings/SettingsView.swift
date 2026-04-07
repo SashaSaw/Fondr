@@ -135,6 +135,16 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         Section {
+            Link(destination: URL(string: "https://sashasaw.github.io/Fondr/privacy.html")!) {
+                HStack {
+                    Text("Privacy Policy")
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .foregroundStyle(.primary)
+            }
             HStack {
                 Text("Version")
                 Spacer()
