@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D4E5F60718091A2B3CA1B2C3 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718091A2B3C /* PrivacyInfo.xcprivacy */; };
 		042ABB2F7F277E4477BB94FE /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90C5E2722721ACCA63FAA218 /* APIClient.swift */; };
 		04FB782626F29F4C48C79FFB /* AddItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4335974CDC00C48D0C9E4C32 /* AddItemSheet.swift */; };
 		095B99DEA99DF72924E98737 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8AC264D3B38C2CEA4698EA3 /* SignInView.swift */; };
@@ -98,6 +99,7 @@
 		589AFE4DE875A9B17EB3EBC5 /* CoupleProfileHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoupleProfileHeader.swift; sourceTree = "<group>"; };
 		5B6754AFC6DBD0BBAD5FB982 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		619B5B42293959209D4BC1FC /* Fondr.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Fondr.entitlements; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718091A2B3C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		69125FE78F3DD71C002D672F /* ListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailView.swift; sourceTree = "<group>"; };
 		699FF98D45EB9CDFDE06887A /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		6DEF4300E3E7AB7AA9145E39 /* Pair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pair.swift; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 			children = (
 				B4D1BC8C039F936C51E0ED4C /* Assets.xcassets */,
 				619B5B42293959209D4BC1FC /* Fondr.entitlements */,
+				A1B2C3D4E5F60718091A2B3C /* PrivacyInfo.xcprivacy */,
 				833A66C8DE830DA9AAEC7973 /* App */,
 				D8DD93D235CE76C108ED5197 /* Components */,
 				2F721C0C9BC0AC1A65879F4E /* Models */,
@@ -420,6 +423,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E7FE64C43B5CD7217913563A /* Assets.xcassets in Resources */,
+				D4E5F60718091A2B3CA1B2C3 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

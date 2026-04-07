@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fondr — Distance makes the heart grow Fondr</title>
+    <meta name="description" content="The couples app for long-distance relationships. Shared lists, swipe to decide on dates, sync calendars, and keep track of your story together.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="screenshots/../Fondr-Icon.jpg" type="image/jpeg">
+</head>
+<body>
+
+<nav>
+    <a href="/" class="nav-brand">
+        <img src="Fondr-Icon.jpg" alt="Fondr">
+        <span>Fondr</span>
+    </a>
+    <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="#download" class="nav-cta">Download</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <img src="Fondr-Icon.jpg" alt="Fondr App Icon" class="hero-icon">
+    <h1>Fondr</h1>
+    <p class="tagline">Distance makes the heart grow Fondr.</p>
+    <a href="#download" class="app-store-badge">
+        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store">
+    </a>
+</section>
+
+<section class="features" id="features">
+
+    <div class="feature">
+        <div class="feature-text">
+            <span class="feature-label">Us</span>
+            <h2>Your relationship<br>at a glance</h2>
+            <p>See how many days you've been together, track upcoming events and birthdays, and keep all your significant dates in one place. Your shared home page.</p>
+        </div>
+        <div class="phone-mockup">
+            <div class="phone-screen">
+                <img src="screenshots/couples-page.PNG" alt="Couples page showing days together and upcoming events">
+            </div>
+        </div>
+    </div>
+
+    <div class="feature">
+        <div class="feature-text">
+            <span class="feature-label">Lists</span>
+            <h2>Plan dates<br>together</h2>
+            <p>Build shared lists of date ideas, restaurants to try, movies to watch, and places to visit. Add ideas anytime — your partner sees them instantly.</p>
+        </div>
+        <div class="phone-mockup">
+            <div class="phone-screen">
+                <img src="screenshots/shared-lists.PNG" alt="Shared lists with date ideas">
+            </div>
+        </div>
+    </div>
+
+    <div class="feature">
+        <div class="feature-text">
+            <span class="feature-label">Swipe</span>
+            <h2>Swipe to decide</h2>
+            <p>Can't agree on what to do? Both swipe through your list — when you both say yes to the same thing, it's a match. No more "I don't mind, you pick."</p>
+        </div>
+        <div class="phone-mockup">
+            <div class="phone-screen">
+                <img src="screenshots/swipe.PNG" alt="Swipe mechanic for deciding on dates">
+            </div>
+        </div>
+    </div>
+
+    <div class="feature">
+        <div class="feature-text">
+            <span class="feature-label">Calendar</span>
+            <h2>See when you're<br>both free</h2>
+            <p>Share your availability, see when your schedules overlap, and propose dates for your next time together. Split hearts show when you're both free.</p>
+        </div>
+        <div class="phone-mockup">
+            <div class="phone-screen">
+                <img src="screenshots/calendar.PNG" alt="Shared calendar with availability">
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section class="cta-section" id="download">
+    <h2>Stay close, no matter the distance.</h2>
+    <p>Download Fondr and start planning your next date together.</p>
+    <a href="#" class="app-store-badge">
+        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store">
+    </a>
+</section>
+
+<footer>
+    <p>&copy; 2026 Fondr. All rights reserved.</p>
+    <a href="privacy.html">Privacy Policy</a>
+</footer>
+
+<script>
+    const features = document.querySelectorAll('.feature');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.15 });
+    features.forEach(f => observer.observe(f));
+</script>
+
+</body>
+</html>

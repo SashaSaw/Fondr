@@ -1,0 +1,461 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #EA5D75;
+    --secondary: #AF9CDD;
+    --accent: #F2C85F;
+    --bg: #FFF0F3;
+    --bg-white: #ffffff;
+    --text: #2D2D3A;
+    --text-light: #6B6B80;
+    --phone-frame: #1a1a2e;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ── Navigation ── */
+
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 1rem 2rem;
+    background: rgba(255, 240, 243, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(234, 93, 117, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.nav-brand img {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+}
+
+.nav-brand span {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-light);
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--primary);
+}
+
+.nav-cta {
+    background: var(--primary) !important;
+    color: white !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: 100px;
+    font-weight: 600 !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+.nav-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(234, 93, 117, 0.35);
+}
+
+/* ── Hero ── */
+
+.hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(234, 93, 117, 0.12) 0%, rgba(175, 156, 221, 0.08) 50%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 28px;
+    box-shadow: 0 8px 40px rgba(234, 93, 117, 0.25);
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.hero h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero .tagline {
+    font-size: 1.35rem;
+    color: var(--text-light);
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+    font-weight: 400;
+}
+
+.app-store-badge {
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.app-store-badge:hover {
+    transform: translateY(-2px);
+}
+
+.app-store-badge img {
+    height: 54px;
+}
+
+/* ── Features ── */
+
+.features {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 5rem;
+    padding: 5rem 0;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.feature.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.feature:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+.feature-text {
+    flex: 1;
+}
+
+.feature-label {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary);
+    background: rgba(234, 93, 117, 0.1);
+    padding: 0.35rem 0.9rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+}
+
+.feature-text h2 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-bottom: 1rem;
+}
+
+.feature-text p {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    line-height: 1.7;
+    max-width: 420px;
+}
+
+/* ── Phone Mockup ── */
+
+.phone-mockup {
+    flex-shrink: 0;
+    width: 270px;
+    height: 555px;
+    background: var(--phone-frame);
+    border-radius: 40px;
+    padding: 12px;
+    box-shadow:
+        0 20px 60px rgba(26, 26, 46, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    position: relative;
+}
+
+.phone-mockup::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 28px;
+    background: var(--phone-frame);
+    border-radius: 0 0 18px 18px;
+    z-index: 2;
+}
+
+.phone-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 30px;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.phone-screen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+}
+
+/* ── CTA Section ── */
+
+.cta-section {
+    text-align: center;
+    padding: 6rem 2rem 8rem;
+    position: relative;
+}
+
+.cta-section::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(175, 156, 221, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.cta-section h2 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+}
+
+.cta-section p {
+    color: var(--text-light);
+    font-size: 1.15rem;
+    margin-bottom: 2rem;
+}
+
+/* ── Footer ── */
+
+footer {
+    border-top: 1px solid rgba(234, 93, 117, 0.1);
+    padding: 2rem;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+footer p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+footer a:hover {
+    color: var(--primary);
+}
+
+/* ── Privacy Policy Page ── */
+
+.privacy {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+}
+
+.privacy h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+}
+
+.privacy .effective-date {
+    color: var(--text-light);
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+}
+
+.privacy h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
+}
+
+.privacy p,
+.privacy li {
+    color: var(--text-light);
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 0.75rem;
+}
+
+.privacy ul {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.privacy a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.privacy a:hover {
+    text-decoration: underline;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+    nav {
+        padding: 0.75rem 1.25rem;
+    }
+
+    .nav-links {
+        gap: 1rem;
+    }
+
+    .nav-links a:not(.nav-cta) {
+        display: none;
+    }
+
+    .hero {
+        padding: 7rem 1.5rem 3rem;
+        min-height: auto;
+    }
+
+    .hero h1 {
+        font-size: 2.6rem;
+    }
+
+    .hero .tagline {
+        font-size: 1.1rem;
+    }
+
+    .hero-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 22px;
+    }
+
+    .features {
+        padding: 0 1.5rem 3rem;
+    }
+
+    .feature {
+        flex-direction: column !important;
+        gap: 2.5rem;
+        padding: 3rem 0;
+        text-align: center;
+    }
+
+    .feature-text p {
+        max-width: 100%;
+    }
+
+    .feature-text h2 {
+        font-size: 1.8rem;
+    }
+
+    .phone-mockup {
+        width: 230px;
+        height: 472px;
+        border-radius: 34px;
+        padding: 10px;
+    }
+
+    .phone-mockup::before {
+        width: 85px;
+        height: 24px;
+        top: 10px;
+        border-radius: 0 0 15px 15px;
+    }
+
+    .phone-screen {
+        border-radius: 26px;
+    }
+
+    .cta-section h2 {
+        font-size: 2rem;
+    }
+
+    footer {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
