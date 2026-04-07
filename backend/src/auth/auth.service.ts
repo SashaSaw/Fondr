@@ -90,7 +90,24 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    return this.generateTokens(user);
+    // Issue new access token but keep the same refresh token.
+    // Rotating refresh tokens on every call causes race conditions
+    // when multiple concurrent requests try to refresh at once.
+    const payload = { sub: user.id, email: user.email };
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        profileImageUrl: user.profileImageUrl,
+        pairId: user.pairId,
+        onboardingCompleted: user.onboardingCompleted,
+      },
+    };
   }
 
   private async generateTokens(user: {

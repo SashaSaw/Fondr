@@ -1,5 +1,25 @@
 import Foundation
 
+private actor RefreshCoordinator {
+    private var activeTask: Task<AuthTokens?, Error>?
+
+    func refresh(_ work: @escaping @Sendable () async throws -> AuthTokens?) async throws -> AuthTokens? {
+        if let active = activeTask {
+            return try await active.value
+        }
+        let task = Task { try await work() }
+        activeTask = task
+        do {
+            let result = try await task.value
+            activeTask = nil
+            return result
+        } catch {
+            activeTask = nil
+            throw error
+        }
+    }
+}
+
 final class APIClient: Sendable {
     static let shared = APIClient()
 
@@ -7,6 +27,7 @@ final class APIClient: Sendable {
     private let session: URLSession
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
+    private let refreshCoordinator = RefreshCoordinator()
 
     private init() {
         self.baseURL = "https://api.sashasaw-fondr-sandbox.eh1.incept5.dev"
@@ -120,8 +141,15 @@ final class APIClient: Sendable {
         }
 
         if httpResponse.statusCode == 401 {
-            // Try to refresh token
-            if let refreshed = try? await refreshTokens() {
+            // Serialize refresh attempts — concurrent 401s share one refresh call
+            do {
+                guard let refreshed = try await refreshCoordinator.refresh({ [self] in
+                    try await self.refreshTokens()
+                }) else {
+                    TokenStore.shared.clear()
+                    throw APIError.unauthorized
+                }
+
                 TokenStore.shared.accessToken = refreshed.accessToken
                 TokenStore.shared.refreshToken = refreshed.refreshToken
 
@@ -144,9 +172,11 @@ final class APIClient: Sendable {
                 }
 
                 return try decoder.decode(T.self, from: retryData)
-            } else {
-                TokenStore.shared.clear()
-                throw APIError.unauthorized
+            } catch let error as APIError {
+                throw error
+            } catch {
+                // Network/transient error during refresh — preserve tokens
+                throw error
             }
         }
 
@@ -166,10 +196,20 @@ final class APIClient: Sendable {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try encoder.encode(RefreshRequest(refreshToken: refreshToken))
 
+        // Network errors (URLError) propagate as throws — callers preserve tokens
         let (data, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              200..<300 ~= httpResponse.statusCode else {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        // Refresh token definitively rejected — caller should clear tokens
+        if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
             return nil
+        }
+
+        // Server error (500, etc.) — retriable, throw to preserve tokens
+        guard 200..<300 ~= httpResponse.statusCode else {
+            throw APIError.httpError(httpResponse.statusCode, data)
         }
 
         return try decoder.decode(AuthTokens.self, from: data)

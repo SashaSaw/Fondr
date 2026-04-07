@@ -43,21 +43,13 @@ final class AppState {
     }
 
     func leavePartnership() {
-        pairService.unpair()
-        authService.appUser?.onboardingCompleted = nil
-        authService.appUser?.partnerName = nil
+        Task {
+            await pairService.unpair()
+            await authService.loadCurrentUser()
+        }
     }
 
     func handlePairRemoved() {
-        guard authService.appUser?.pairId != nil else { return }
-
-        // Update local state
-        authService.appUser?.pairId = nil
-        authService.appUser?.partnerUid = nil
-        authService.appUser?.onboardingCompleted = nil
-        authService.appUser?.partnerName = nil
-
-        // Reload user from server to get clean state
         Task {
             await authService.loadCurrentUser()
         }

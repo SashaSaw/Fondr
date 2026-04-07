@@ -24,11 +24,18 @@ final class AuthService {
     }
 
     func start() {
-        // Restore session from keychain
         if TokenStore.shared.isLoggedIn {
-            Task {
-                await loadCurrentUser()
-                await MainActor.run { isReady = true }
+            // Load cached user for instant startup (no spinner)
+            if let cached = loadCachedUser() {
+                self.appUser = cached
+                self.isReady = true
+                Task { await loadCurrentUser() }
+            } else {
+                // No cache — wait for API before showing UI
+                Task {
+                    await loadCurrentUser()
+                    await MainActor.run { isReady = true }
+                }
             }
         } else {
             isReady = true
@@ -116,6 +123,7 @@ final class AuthService {
 
     func signOut() {
         TokenStore.shared.clear()
+        clearCachedUser()
         WebSocketManager.shared.disconnect()
         appUser = nil
     }
@@ -149,15 +157,17 @@ final class AuthService {
             let user: AppUser = try await APIClient.shared.get("/users/me")
             await MainActor.run {
                 self.appUser = user
+                self.cacheUser(user)
             }
         } catch {
-            // Token might be invalid
             if case APIError.unauthorized = error {
                 await MainActor.run {
                     TokenStore.shared.clear()
+                    self.clearCachedUser()
                     self.appUser = nil
                 }
             }
+            // Network/transient errors: keep cached appUser and tokens
         }
     }
 
@@ -177,10 +187,30 @@ final class AuthService {
         TokenStore.shared.refreshToken = response.refreshToken
         TokenStore.shared.userId = response.user.id
         appUser = response.user
+        cacheUser(response.user)
         isLoading = false
 
         // Connect WebSocket after auth
         WebSocketManager.shared.connect()
+    }
+
+    // MARK: - User Cache
+
+    private static let cachedUserKey = "com.fondr.cachedAppUser"
+
+    private func cacheUser(_ user: AppUser) {
+        if let data = try? JSONEncoder().encode(user) {
+            UserDefaults.standard.set(data, forKey: Self.cachedUserKey)
+        }
+    }
+
+    private func loadCachedUser() -> AppUser? {
+        guard let data = UserDefaults.standard.data(forKey: Self.cachedUserKey) else { return nil }
+        return try? JSONDecoder().decode(AppUser.self, from: data)
+    }
+
+    private func clearCachedUser() {
+        UserDefaults.standard.removeObject(forKey: Self.cachedUserKey)
     }
 }
 

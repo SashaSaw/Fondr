@@ -98,23 +98,13 @@ final class PairService {
 
     // MARK: - Unpair
 
-    func unpair() {
+    func unpair() async {
         guard let pair = currentPair else { return }
-        isLoading = true
-
-        Task {
-            do {
-                try await APIClient.shared.delete("/pairs/\(pair.id)") as SuccessResponse
-                await MainActor.run {
-                    self.currentPair = nil
-                    self.isLoading = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                    self.isLoading = false
-                }
-            }
+        do {
+            let _: SuccessResponse = try await APIClient.shared.delete("/pairs/\(pair.id)")
+            await MainActor.run { self.currentPair = nil }
+        } catch {
+            await MainActor.run { self.errorMessage = error.localizedDescription }
         }
     }
 }

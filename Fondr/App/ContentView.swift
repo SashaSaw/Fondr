@@ -22,17 +22,19 @@ struct ContentView: View {
                 .background(Color.fondrBackground)
             } else if !appState.isAuthenticated {
                 SignInView()
+            } else if appState.isPaired {
+                if hasPendingRequests && !dismissedEventRequests {
+                    EventRequestView {
+                        dismissedEventRequests = true
+                    }
+                    .environment(appState.calendarService)
+                } else {
+                    MainTabView()
+                }
             } else if appState.needsOnboarding {
                 OnboardingView()
-            } else if !appState.isPaired {
-                CreatePairView()
-            } else if hasPendingRequests && !dismissedEventRequests {
-                EventRequestView {
-                    dismissedEventRequests = true
-                }
-                .environment(appState.calendarService)
             } else {
-                MainTabView()
+                CreatePairView()
             }
         }
         .animation(.easeInOut, value: appState.isAuthenticated)
@@ -81,11 +83,11 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active && appState.isAuthenticated {
-                // Reconnect WebSocket and reload state on foreground
-                WebSocketManager.shared.reconnect()
+                // Refresh user (and token if needed) BEFORE reconnecting WebSocket
                 Task {
                     await appState.authService.loadCurrentUser()
-                    if let pairId = appState.pairService.currentPair?.id {
+                    WebSocketManager.shared.reconnect()
+                    if appState.pairService.currentPair?.id != nil {
                         appState.setupListListener()
                         appState.setupCalendarListener()
                         appState.setupOurStoryListener()
