@@ -21,6 +21,7 @@
     "@nestjs/platform-express": "^10.4.0",
     "@nestjs/platform-socket.io": "^10.4.0",
     "@nestjs/platform-ws": "^10.4.22",
+    "@nestjs/schedule": "^6.1.1",
     "@nestjs/websockets": "^10.4.0",
     "@prisma/client": "^5.20.0",
     "apns2": "^11.7.0",

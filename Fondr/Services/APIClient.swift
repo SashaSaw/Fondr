@@ -243,8 +243,9 @@ enum APIError: LocalizedError {
         case .invalidResponse: return "Invalid response"
         case .unauthorized: return "Session expired. Please sign in again."
         case .httpError(let code, let data):
-            if let body = try? JSONDecoder().decode([String: String].self, from: data),
-               let message = body["message"] {
+            // NestJS returns { statusCode: Int, message: String } — decode as [String: Any]
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let message = json["message"] as? String {
                 return message
             }
             return "Server error (\(code))"

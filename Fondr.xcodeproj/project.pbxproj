@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D4E5F60718091A2B3CA1B2C3 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718091A2B3C /* PrivacyInfo.xcprivacy */; };
 		042ABB2F7F277E4477BB94FE /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90C5E2722721ACCA63FAA218 /* APIClient.swift */; };
 		04FB782626F29F4C48C79FFB /* AddItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4335974CDC00C48D0C9E4C32 /* AddItemSheet.swift */; };
 		095B99DEA99DF72924E98737 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8AC264D3B38C2CEA4698EA3 /* SignInView.swift */; };
@@ -58,6 +57,7 @@
 		C0DE7291A6B3A710021599C9 /* ListCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 914A22A788DACEEA8F24BF7A /* ListCardView.swift */; };
 		C3E6EDA00CC12A517A1C9BA4 /* ListItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDC6A1A6DD98ABC4AFE7C12 /* ListItemDetailView.swift */; };
 		D262D8329E18F2B7515B5138 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C56C2329784A7F1D43A339A /* SignUpView.swift */; };
+		D4E5F60718091A2B3CA1B2C3 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718091A2B3C /* PrivacyInfo.xcprivacy */; };
 		D9551FE13FF6A42C0FDFF034 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03C3BEBB6B29C07FDF3C4AE /* NotificationService.swift */; };
 		DF7F4839D69FABA7F7A09D6A /* SwipeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C360B6D9E8718EC28D34E8 /* SwipeSession.swift */; };
 		E240EF455133F02C80395F97 /* AddAvailabilitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0EE995098FE144EDFCFB84 /* AddAvailabilitySheet.swift */; };
@@ -99,7 +99,6 @@
 		589AFE4DE875A9B17EB3EBC5 /* CoupleProfileHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoupleProfileHeader.swift; sourceTree = "<group>"; };
 		5B6754AFC6DBD0BBAD5FB982 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		619B5B42293959209D4BC1FC /* Fondr.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Fondr.entitlements; sourceTree = "<group>"; };
-		A1B2C3D4E5F60718091A2B3C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		69125FE78F3DD71C002D672F /* ListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailView.swift; sourceTree = "<group>"; };
 		699FF98D45EB9CDFDE06887A /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		6DEF4300E3E7AB7AA9145E39 /* Pair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pair.swift; sourceTree = "<group>"; };
@@ -114,6 +113,7 @@
 		9F118E1CD2680DA9A123E2E1 /* SwipeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeCardView.swift; sourceTree = "<group>"; };
 		A03C3BEBB6B29C07FDF3C4AE /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		A0AD6F36F9EA79DAEAD54520 /* SignificantDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignificantDate.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718091A2B3C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A2616052887D36C66695623A /* CreateListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateListSheet.swift; sourceTree = "<group>"; };
 		A33F7E6B896B05377B106CB1 /* ListItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemRow.swift; sourceTree = "<group>"; };
 		A69D7F1E8EFE0A4D0379ACEC /* AddFactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFactSheet.swift; sourceTree = "<group>"; };
@@ -505,7 +505,7 @@
 				CODE_SIGN_ENTITLEMENTS = Fondr/Fondr.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = S32NZ4QVZF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Fondr;
@@ -654,7 +654,7 @@
 				CODE_SIGN_ENTITLEMENTS = Fondr/Fondr.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = S32NZ4QVZF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Fondr;

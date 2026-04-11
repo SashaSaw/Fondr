@@ -4,8 +4,11 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+
+const PAIR_CODE_EXPIRY_DAYS = 30;
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -69,6 +72,12 @@ export class PairsService {
     });
 
     if (!pair || pair.status !== 'pending') {
+      throw new NotFoundException('Invalid or expired invite code');
+    }
+
+    const ageMs = Date.now() - pair.createdAt.getTime();
+    if (ageMs > PAIR_CODE_EXPIRY_DAYS * 24 * 60 * 60 * 1000) {
+      await this.deleteExpiredPair(pair.id, pair.userAId);
       throw new NotFoundException('Invalid or expired invite code');
     }
 
@@ -148,6 +157,25 @@ export class PairsService {
     await this.prisma.pair.delete({ where: { id: pairId } });
 
     return { success: true };
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  async cleanupExpiredPairs() {
+    const cutoff = new Date(Date.now() - PAIR_CODE_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+    const expired = await this.prisma.pair.findMany({
+      where: { status: 'pending', createdAt: { lt: cutoff } },
+    });
+    for (const pair of expired) {
+      await this.deleteExpiredPair(pair.id, pair.userAId);
+    }
+  }
+
+  private async deleteExpiredPair(pairId: string, userAId: string) {
+    await this.prisma.user.updateMany({
+      where: { pairId },
+      data: { pairId: null },
+    });
+    await this.prisma.pair.delete({ where: { id: pairId } });
   }
 
   async get(pairId: string) {
